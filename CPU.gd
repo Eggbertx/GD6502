@@ -1,6 +1,6 @@
 extends Node
 
-# class_name CPU
+class_name CPU
 
 signal status_changed
 signal cpu_reset

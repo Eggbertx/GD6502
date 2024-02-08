@@ -1,4 +1,4 @@
-# class_name Opcodes
+class_name Opcodes
 
 # addressing modes
 enum {
