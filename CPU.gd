@@ -197,7 +197,7 @@ func execute(force = false, new_PC = -1):
 			_update_zero(A)
 		0x16:
 			pass
-		0x18: #$ CLC, implied
+		0x18: # CLC, implied
 			set_flag(flag_bit.CARRY, false)
 		0x19:
 			pass
@@ -512,7 +512,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xD6:
 			pass
-		0xD8: # CLD
+		0xD8: # CLD, implied
 			set_flag(flag_bit.BCD, false)
 		0xD9:
 			pass
