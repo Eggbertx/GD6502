@@ -7,7 +7,7 @@ To limit dependences, unit tests for this project are stored in the [GD6502-IDE]
 
 ## Opcodes
 Here is a table of the implemented opcodes. An empty checkbox means that it hasn't been implemented yet.
-    means that the addressing mode does not exist for the respective instruction.
+A table cell with no checkbox represents an addressing mode that does not exist for the respective instruction.
 
 Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZPY | REL | IND
 ------------|-----|-----|-----|-----|-----|------|------|------|------|-----|-----|-----|------
