@@ -123,14 +123,14 @@ func push_word(byte:int):
 	push_byte(byte & 0xFF)
 	push_byte((byte >> 8) & 0xFF)
 
-func get_byte(addr:int):
+func get_byte(addr:int) -> int:
 	if addr >= memory_size:
 		return 0
 	elif addr == 0xfe:
 		return randi_range(0, 255)
 	return memory[addr]
 
-func get_word(pos:int):
+func get_word(pos:int) -> int:
 	return memory[pos&0xFF] + (memory[(pos+1)&0xFF] << 8)
 
 func set_byte(addr:int, value:int):
@@ -168,7 +168,7 @@ func execute(force = false, new_PC = -1):
 		0x01:
 			pass
 		0x05: # ORA, zero page
-			var zp = pop_byte()
+			var zp := pop_byte()
 			A |= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
@@ -177,7 +177,7 @@ func execute(force = false, new_PC = -1):
 		0x08:
 			pass
 		0x09: # ORA, immediate
-			var num = pop_byte()
+			var num := pop_byte()
 			A |= num
 			_update_negative(A)
 			_update_zero(A)
@@ -194,7 +194,7 @@ func execute(force = false, new_PC = -1):
 		0x11:
 			pass
 		0x15: # ORA, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
+			var zp := (pop_byte() + X) % 0xFF
 			A |= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
@@ -215,7 +215,7 @@ func execute(force = false, new_PC = -1):
 		0x24:
 			pass
 		0x25: # AND, zero page
-			var num = memory[pop_byte()]
+			var num := memory[pop_byte()]
 			A &= num
 			_update_negative(A)
 			_update_zero(A)
@@ -224,7 +224,7 @@ func execute(force = false, new_PC = -1):
 		0x28:
 			pass
 		0x29: # AND, immediate
-			var imm = pop_byte()
+			var imm := pop_byte()
 			A &= imm
 			_update_negative(A)
 			_update_zero(A)
@@ -243,7 +243,7 @@ func execute(force = false, new_PC = -1):
 		0x31:
 			pass
 		0x35: # AND, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
+			var zp := (pop_byte() + X) % 0xFF
 			A &= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
@@ -263,8 +263,15 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x45:
 			pass
-		0x46:
-			pass
+		0x46: # LSR, zero page
+			var zp := pop_byte()
+			var num := get_byte(zp)
+			_update_carry_from_bit_0(num)
+			var mask7 := (num & 1) << 7
+			num = ((num >> 1) & 0xFF) | mask7
+			set_byte(zp, num)
+			_update_negative(num)
+			_update_zero(num)
 		0x48:
 			pass
 		0x49:
@@ -339,7 +346,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x81: # STA, indexed indirect
 			var zp := (pop_byte() + X) % 0xFF
-			var addr = get_word(zp)
+			var addr := get_word(zp)
 			set_byte(addr, A)
 		0x84: # STY, zero page
 			var zp = pop_byte()
@@ -442,23 +449,23 @@ func execute(force = false, new_PC = -1):
 		0xB0:
 			pass
 		0xB1: # LDA, indirect indexed
-			var zp = pop_byte()
-			var addr = get_word(zp)
+			var zp := pop_byte()
+			var addr := get_word(zp)
 			A = memory[addr+Y]
 			_update_zero(A)
 			_update_negative(A)
 		0xB4: # LDY, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
+			var zp := (pop_byte() + X) % 0xFF
 			Y = memory[zp]
 			_update_zero(Y)
 			_update_negative(Y)
 		0xB5: # LDA, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
+			var zp := (pop_byte() + X) % 0xFF
 			A = memory[zp]
 			_update_zero(A)
 			_update_negative(A)
 		0xB6: # LDX, zero page, y
-			var zp = (pop_byte() + Y) % 0xFF
+			var zp := (pop_byte() + Y) % 0xFF
 			X = memory[zp]
 			_update_zero(X)
 			_update_negative(X)
@@ -491,7 +498,7 @@ func execute(force = false, new_PC = -1):
 		0xC5:
 			pass
 		0xC6: #DEC, zero page
-			var zp = pop_byte()
+			var zp := pop_byte()
 			set_byte(memory[zp], (memory[zp] - 1) & 0xFF)
 			_update_zero(memory[zp])
 			_update_negative(memory[zp])
