@@ -147,6 +147,9 @@ func _update_zero(register: int):
 func _update_negative(register: int):
 	set_flag(flag_bit.NEGATIVE, (register & 0x80) > 0)
 
+func _update_carry_from_bit_0(val: int):
+	set_flag(flag_bit.CARRY, (val & 1) == 0)
+
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
 		return
@@ -266,8 +269,12 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x49:
 			pass
-		0x4A:
-			pass
+		0x4A: # LSR, accumulator
+			_update_carry_from_bit_0(A)
+			var mask7 := (A & 1) << 7
+			A = ((A >> 1) & 0xFF) | mask7
+			_update_negative(A)
+			_update_zero(A)
 		0x4A:
 			pass
 		0x4C: # JMP, absolute
