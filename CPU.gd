@@ -550,7 +550,7 @@ func execute(force = false, new_PC = -1):
 			_update_negative(X)
 		0xE9:
 			pass
-		0xEA:
+		0xEA: # NOP, implied
 			pass
 		0xEC:
 			pass
