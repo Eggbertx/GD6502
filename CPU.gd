@@ -166,103 +166,101 @@ func execute(force = false, new_PC = -1):
 			set_status(status.STOPPED, true)
 			set_flag(flag_bit.BREAK, true)
 		0x01:
-			pass
+			assert(false, "Not implemented: ORA zero page, x")
 		0x05: # ORA, zero page
 			var zp := pop_byte()
 			A |= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
 		0x06:
-			pass
+			assert(false, "Not implemented: ASL zero page")
 		0x08:
-			pass
+			assert(false, "Not implemented: PHP implied")
 		0x09: # ORA, immediate
 			var num := pop_byte()
 			A |= num
 			_update_negative(A)
 			_update_zero(A)
 		0x0A:
-			pass
+			assert(false, "Not implemented: ASL accumulator")
 		0x0D: # ORA, absolute
 			A |= memory[pop_word()]
 			_update_negative(A)
 			_update_zero(A)
 		0x0E:
-			pass
+			assert(false, "Opcode $0E not implemented yet")
 		0x10:
-			pass
+			assert(false, "Opcode $10 not implemented yet")
 		0x11:
-			pass
+			assert(false, "Opcode $11 not implemented yet")
 		0x15: # ORA, zero page, x
 			var zp := (pop_byte() + X) % 0xFF
 			A |= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
 		0x16:
-			pass
+			assert(false, "Opcode not implemented yet")
 		0x18: # CLC, implied
 			set_flag(flag_bit.CARRY, false)
 		0x19:
-			pass
+			assert(false, "Opcode $19 not implemented yet")
 		0x1D:
-			pass
+			assert(false, "Opcode $1D not implemented yet")
 		0x1E:
-			pass
+			assert(false, "Opcode $1E not implemented yet")
 		0x20:
-			pass
+			assert(false, "Opcode $20 not implemented yet")
 		0x21:
-			pass
+			assert(false, "Opcode not implemented yet")
 		0x24:
-			pass
+			assert(false, "Opcode not implemented yet")
 		0x25: # AND, zero page
 			var num := memory[pop_byte()]
 			A &= num
 			_update_negative(A)
 			_update_zero(A)
 		0x26:
-			pass
+			assert(false, "Opcode $26 not implemented yet")
 		0x28:
-			pass
+			assert(false, "Opcode $28 not implemented yet")
 		0x29: # AND, immediate
 			var imm := pop_byte()
 			A &= imm
 			_update_negative(A)
 			_update_zero(A)
 		0x2A:
-			pass
-		0x2A:
-			pass
+			assert(false, "Opcode $2A not implemented yet")
 		0x2C:
-			pass
+			assert(false, "Opcode $2C not implemented yet")
 		0x2D:
-			pass
+			assert(false, "Opcode $2D not implemented yet")
 		0x2E:
-			pass
+			assert(false, "Opcode $2E not implemented yet")
 		0x30:
-			pass
+			assert(false, "Opcode $30 not implemented yet")
 		0x31:
-			pass
+			assert(false, "Opcode $31 not implemented yet")
 		0x35: # AND, zero page, x
 			var zp := (pop_byte() + X) % 0xFF
 			A &= memory[zp]
 			_update_negative(A)
 			_update_zero(A)
 		0x36:
-			pass
+			assert(false, "Opcode $36 not implemented yet")
 		0x38: # SEC, implied
 			set_flag(flag_bit.CARRY, true)
 		0x39:
-			pass
+			assert(false, "Opcode $39 not implemented yet")
 		0x3D:
-			pass
+			assert(false, "Opcode $3D not implemented yet")
 		0x3E:
-			pass
+			assert(false, "Opcode $3E not implemented yet")
 		0x40:
-			pass
+			assert(false, "Opcode $40 not implemented yet")
 		0x41:
-			pass
+			assert(false, "Opcode $41 not implemented yet")
 		0x45:
-			pass
+			assert(false, "Opcode $45 not implemented yet")
 		0x46: # LSR, zero page
 			var zp := pop_byte()
 			var num := get_byte(zp)
@@ -273,9 +271,9 @@ func execute(force = false, new_PC = -1):
 			_update_negative(num)
 			_update_zero(num)
 		0x48:
-			pass
+			assert(false, "Opcode $48 not implemented yet")
 		0x49:
-			pass
+			assert(false, "Opcode $49 not implemented yet")
 		0x4A: # LSR, accumulator
 			_update_carry_from_bit_0(A)
 			var mask7 := (A & 1) << 7
@@ -283,67 +281,65 @@ func execute(force = false, new_PC = -1):
 			_update_negative(A)
 			_update_zero(A)
 		0x4A:
-			pass
+			assert(false, "Opcode $4A not implemented yet")
 		0x4C: # JMP, absolute
 			PC = pop_word()
 		0x4D:
-			pass
+			assert(false, "Opcode $4D not implemented yet")
 		0x4E:
-			pass
+			assert(false, "Opcode $4E not implemented yet")
 		0x50:
-			pass
+			assert(false, "Opcode $50 not implemented yet")
 		0x51:
-			pass
+			assert(false, "Opcode $51 not implemented yet")
 		0x55:
-			pass
+			assert(false, "Opcode $55 not implemented yet")
 		0x56:
-			pass
+			assert(false, "Opcode $56 not implemented yet")
 		0x58: # CLI, implied
 			set_flag(flag_bit.INTERRUPT, false)
 		0x59:
-			pass
+			assert(false, "Opcode $59 not implemented yet")
 		0x5D:
-			pass
+			assert(false, "Opcode $5D not implemented yet")
 		0x5E:
-			pass
+			assert(false, "Opcode $5E not implemented yet")
 		0x60:
-			pass
+			assert(false, "Opcode $60 not implemented yet")
 		0x61:
-			pass
+			assert(false, "Opcode $61 not implemented yet")
 		0x65:
-			pass
+			assert(false, "Opcode $65 not implemented yet")
 		0x66:
-			pass
+			assert(false, "Opcode $66 not implemented yet")
 		0x68:
-			pass
+			assert(false, "Opcode $68 not implemented yet")
 		0x69:
-			pass
+			assert(false, "Opcode $69 not implemented yet")
 		0x6A:
-			pass
-		0x6A:
-			pass
+			assert(false, "Opcode $6A not implemented yet")
 		0x6C:
-			pass
+			assert(false, "Opcode $6C not implemented yet")
 		0x6D:
-			pass
+			assert(false, "Opcode $6D not implemented yet")
 		0x6E:
-			pass
+			assert(false, "Opcode $6E not implemented yet")
 		0x70:
-			pass
+			assert(false, "Opcode $70 not implemented yet")
 		0x71:
-			pass
+			assert(false, "Opcode $71 not implemented yet")
 		0x75:
-			pass
+			assert(false, "Opcode $75 not implemented yet")
 		0x76:
-			pass
+			assert(false, "Opcode $76 not implemented yet")
 		0x78: # SEI, implied
 			set_flag(flag_bit.INTERRUPT, true)
 		0x79:
-			pass
+			assert(false, "Opcode $79 not implemented yet")
 		0x7D:
-			pass
+			assert(false, "Opcode $7D not implemented yet")
 		0x7E:
-			pass
+			assert(false, "Opcode $7E not implemented yet")
 		0x81: # STA, indexed indirect
 			var zp := (pop_byte() + X) % 0xFF
 			var addr := get_word(zp)
@@ -372,7 +368,7 @@ func execute(force = false, new_PC = -1):
 		0x8E: # STX, absolute
 			set_byte(pop_word(), X)
 		0x90:
-			pass
+			assert(false, "Opcode $90 not implemented yet")
 		0x91: # STA, indirect indexed
 			var zp = pop_byte()
 			var addr = get_word(zp)
@@ -393,7 +389,7 @@ func execute(force = false, new_PC = -1):
 		0x99: # STA, absolute, y
 			set_byte(pop_word() + Y, A)
 		0x9A:
-			pass
+			assert(false, "Opcode $9A not implemented yet")
 		0x9D: # STA, absolute,  x
 			set_byte(pop_word() + X, A)
 		0xA0: # LDY, immediate
@@ -447,7 +443,7 @@ func execute(force = false, new_PC = -1):
 			_update_zero(X)
 			_update_negative(X)
 		0xB0:
-			pass
+			assert(false, "Opcode $B0 not implemented yet")
 		0xB1: # LDA, indirect indexed
 			var zp := pop_byte()
 			var addr := get_word(zp)
@@ -476,7 +472,7 @@ func execute(force = false, new_PC = -1):
 			_update_zero(A)
 			_update_negative(A)
 		0xBA:
-			pass
+			assert(false, "Opcode $BA not implemented yet")
 		0xBC: # LDY, absolute, x
 			Y = memory[pop_word() + X]
 			_update_zero(Y)
@@ -490,13 +486,13 @@ func execute(force = false, new_PC = -1):
 			_update_zero(Y)
 			_update_negative(Y)
 		0xC0:
-			pass
+			assert(false, "Opcode $C0 not implemented yet")
 		0xC1:
-			pass
+			assert(false, "Opcode $C1 not implemented yet")
 		0xC4:
-			pass
+			assert(false, "Opcode $C4 not implemented yet")
 		0xC5:
-			pass
+			assert(false, "Opcode $C5 not implemented yet")
 		0xC6: #DEC, zero page
 			var zp := pop_byte()
 			set_byte(memory[zp], (memory[zp] - 1) & 0xFF)
@@ -507,73 +503,73 @@ func execute(force = false, new_PC = -1):
 			_update_zero(Y)
 			_update_negative(Y)
 		0xC9:
-			pass
+			assert(false, "Opcode $C9 not implemented yet")
 		0xCA: # DEX, implied
 			X = (X - 1) & 0xFF
 			_update_zero(X)
 			_update_negative(X)
 		0xCC:
-			pass
+			assert(false, "Opcode $CC not implemented yet")
 		0xCD:
-			pass
+			assert(false, "Opcode $CD not implemented yet")
 		0xCE:
-			pass
+			assert(false, "Opcode $CE not implemented yet")
 		0xD0:
-			pass
+			assert(false, "Opcode $D0 not implemented yet")
 		0xD1:
-			pass
+			assert(false, "Opcode $D1 not implemented yet")
 		0xD5:
-			pass
+			assert(false, "Opcode $D5 not implemented yet")
 		0xD6:
-			pass
+			assert(false, "Opcode $D6 not implemented yet")
 		0xD8: # CLD, implied
 			set_flag(flag_bit.BCD, false)
 		0xD9:
-			pass
+			assert(false, "Opcode $D9 not implemented yet")
 		0xDD:
-			pass
+			assert(false, "Opcode $DD not implemented yet")
 		0xDE:
-			pass
+			assert(false, "Opcode $DE not implemented yet")
 		0xE0:
-			pass
+			assert(false, "Opcode $E0 not implemented yet")
 		0xE1:
-			pass
+			assert(false, "Opcode $E1 not implemented yet")
 		0xE4:
-			pass
+			assert(false, "Opcode $E4 not implemented yet")
 		0xE5:
-			pass
+			assert(false, "Opcode $E5 not implemented yet")
 		0xE6:
-			pass
+			assert(false, "Opcode $E6 not implemented yet")
 		0xE8: # INX, implied
 			X = (X + 1) & 0xFF
 			_update_zero(X)
 			_update_negative(X)
 		0xE9:
-			pass
+			assert(false, "Opcode $E9 not implemented yet")
 		0xEA: # NOP, implied
 			pass
 		0xEC:
-			pass
+			assert(false, "Opcode $EC not implemented yet")
 		0xED:
-			pass
+			assert(false, "Opcode $ED not implemented yet")
 		0xEE:
-			pass
+			assert(false, "Opcode $EE not implemented yet")
 		0xF0:
-			pass
+			assert(false, "Opcode $F0 not implemented yet")
 		0xF1:
-			pass
+			assert(false, "Opcode $F1 not implemented yet")
 		0xF5:
-			pass
+			assert(false, "Opcode $F5 not implemented yet")
 		0xF6:
-			pass
+			assert(false, "Opcode $F6 not implemented yet")
 		0xF8:
-			pass
+			assert(false, "Opcode $F7 not implemented yet")
 		0xF9:
-			pass
+			assert(false, "Opcode $F9 not implemented yet")
 		0xFD:
-			pass
+			assert(false, "Opcode $FD not implemented yet")
 		0xFE:
-			pass
+			assert(false, "Opcode $FE not implemented yet")
 
 func step(steps:int = 1):
 	_status = status.PAUSED
