@@ -7,6 +7,8 @@ signal cpu_reset
 signal rom_loaded
 signal rom_unloaded
 signal watched_memory_changed(location:int, new_val:int)
+signal stack_filled
+signal stack_emptied
 
 # status register bits
 enum flag_bit {
@@ -32,7 +34,7 @@ var A := 0
 var X := 0
 var Y := 0
 var PC := PC_START
-var SP := 0
+var SP := 0xFF
 var _status := status.STOPPED
 var memory := PackedByteArray()
 var memory_size := 0
@@ -95,7 +97,7 @@ func reset(reset_status:status = _status):
 	X = 0
 	Y = 0
 	PC = PC_START
-	SP = 0
+	SP = 0xFF
 	flags = 0
 	set_status(reset_status, true)
 	cpu_reset.emit()
@@ -136,10 +138,24 @@ func get_word(pos:int) -> int:
 func set_byte(addr:int, value:int):
 	if addr >= memory_size:
 		return
-	memory[addr] = value
+	memory[addr] = value & 0xFF
 	for watched in watched_ranges:
 		if addr >= watched[0] and addr <= watched[1]:
 			watched_memory_changed.emit(addr, value)
+
+func push_stack_addr(addr: int):
+	if SP < 1:
+		stack_filled.emit()
+		SP = 0xFF
+	set_byte(0x100 + (SP & 0xFF), (addr & 0xFF00) >> 8)
+	set_byte(0x100 + ((SP - 1) & 0xFF), addr)
+	SP -= 2
+
+func pop_stack_addr() -> int:
+	if SP > 0xFE:
+		stack_emptied.emit()
+	SP += 2
+	return get_word(0x100 + SP-3)
 
 func _update_zero(register: int):
 	set_flag(flag_bit.ZERO, register == 0)
@@ -208,8 +224,9 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $1D not implemented yet")
 		0x1E:
 			assert(false, "Opcode $1E not implemented yet")
-		0x20:
-			assert(false, "Opcode $20 not implemented yet")
+		0x20: # JSR, absolute
+			PC = pop_word()
+			push_stack_addr(PC+1)
 		0x21:
 			assert(false, "Opcode not implemented yet")
 		0x24:
