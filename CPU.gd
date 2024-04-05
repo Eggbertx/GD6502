@@ -26,8 +26,8 @@ enum status {
 	STOPPED, RUNNING, PAUSED, END
 }
 
-const RAM_END := 0x05FF
-const PC_START := 0x0600
+const RAM_END := 0x05FF # TODO: make this configurable somehow
+const PC_START := 0x0600 # TODO: make this configurable somehow
 
 # registers
 var A := 0
@@ -118,7 +118,7 @@ func push_byte(byte:int):
 		memory[PC] = byte & 0xFF
 		PC += 1
 
-func pop_word():
+func pop_word() -> int:
 	return pop_byte() + (pop_byte() << 8)
 
 func push_word(byte:int):
@@ -133,7 +133,7 @@ func get_byte(addr:int) -> int:
 	return memory[addr]
 
 func get_word(pos:int) -> int:
-	return memory[pos&0xFF] + (memory[(pos+1)&0xFF] << 8)
+	return memory[pos&0xFF] | (memory[(pos+1)&0xFF] << 8)
 
 func set_byte(addr:int, value:int):
 	if addr >= memory_size:
@@ -143,19 +143,26 @@ func set_byte(addr:int, value:int):
 		if addr >= watched[0] and addr <= watched[1]:
 			watched_memory_changed.emit(addr, value)
 
-func push_stack_addr(addr: int):
-	if SP < 1:
+func push_stack(val: int):
+	set_byte(0x100 + (SP & 0xFF), val & 0xFF)
+	SP -= 1
+	if SP < 0:
 		stack_filled.emit()
-		SP = 0xFF
-	set_byte(0x100 + (SP & 0xFF), (addr & 0xFF00) >> 8)
-	set_byte(0x100 + ((SP - 1) & 0xFF), addr)
-	SP -= 2
+		SP &= 0xFF
+
+func push_stack_addr(addr: int):
+	push_stack((addr & 0xFF00) >> 8)
+	push_stack(addr & 0xFF)
+
+func pop_stack() -> int:
+	SP += 1
+	if SP > 0xFF:
+		stack_emptied.emit()
+		SP &= 0xFF
+	return get_byte(0x100 + SP)
 
 func pop_stack_addr() -> int:
-	if SP > 0xFE:
-		stack_emptied.emit()
-	SP += 2
-	return get_word(0x100 + SP-3)
+	return (pop_stack() | (pop_stack() << 8)) + 1
 
 func _update_zero(register: int):
 	set_flag(flag_bit.ZERO, register == 0)
@@ -225,8 +232,8 @@ func execute(force = false, new_PC = -1):
 		0x1E:
 			assert(false, "Opcode $1E not implemented yet")
 		0x20: # JSR, absolute
-			PC = pop_word()
 			push_stack_addr(PC+1)
+			PC = pop_word()
 		0x21:
 			assert(false, "Opcode not implemented yet")
 		0x24:
@@ -321,8 +328,8 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $5D not implemented yet")
 		0x5E:
 			assert(false, "Opcode $5E not implemented yet")
-		0x60:
-			assert(false, "Opcode $60 not implemented yet")
+		0x60: # RTS, implied
+			PC = pop_stack_addr()
 		0x61:
 			assert(false, "Opcode $61 not implemented yet")
 		0x65:
