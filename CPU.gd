@@ -41,7 +41,6 @@ var memory_size := 0
 var _init_ram_size := 0
 var opcode := 0
 var flags := 0
-var logger: Node
 var watched_ranges := [] # each element: [start,end]
 
 func _init(memsize = RAM_END):
@@ -51,7 +50,6 @@ func _init(memsize = RAM_END):
 
 func _ready():
 	reset()
-	logger = null
 
 func get_status() -> status:
 	return _status
@@ -88,9 +86,6 @@ func unload_rom():
 	for b in range(memory_size - PC_START):
 		memory[PC_START + b] = 0
 	rom_unloaded.emit()
-
-func set_logger(newlogger):
-	logger = newlogger
 
 func reset(reset_status:status = _status):
 	A = 0
