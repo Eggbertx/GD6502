@@ -26,8 +26,9 @@ enum status {
 	STOPPED, RUNNING, PAUSED, END
 }
 
-const RAM_END := 0x05FF # TODO: make this configurable somehow
-const PC_START := 0x0600 # TODO: make this configurable somehow
+# TODO: make these configurable somehow
+const RAM_END := 0x05FF
+const PC_START := 0x0600
 
 # registers
 var A := 0
@@ -166,7 +167,7 @@ func _update_negative(register: int):
 	set_flag(flag_bit.NEGATIVE, (register & 0x80) > 0)
 
 func _update_carry_from_bit_0(val: int):
-	set_flag(flag_bit.CARRY, (val & 1) == 0)
+	set_flag(flag_bit.CARRY, (val & 1) == 1)
 
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
@@ -287,8 +288,7 @@ func execute(force = false, new_PC = -1):
 			var zp := pop_byte()
 			var num := get_byte(zp)
 			_update_carry_from_bit_0(num)
-			var mask7 := (num & 1) << 7
-			num = ((num >> 1) & 0xFF) | mask7
+			num = (num >> 1) & 0xFF
 			set_byte(zp, num)
 			_update_negative(num)
 			_update_zero(num)
@@ -298,8 +298,7 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $49 not implemented yet")
 		0x4A: # LSR, accumulator
 			_update_carry_from_bit_0(A)
-			var mask7 := (A & 1) << 7
-			A = ((A >> 1) & 0xFF) | mask7
+			A = (A >> 1) & 0xFF
 			_update_negative(A)
 			_update_zero(A)
 		0x4A:
@@ -584,8 +583,8 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $F5 not implemented yet")
 		0xF6:
 			assert(false, "Opcode $F6 not implemented yet")
-		0xF8:
-			assert(false, "Opcode $F7 not implemented yet")
+		0xF8: # SED, implied
+			set_flag(flag_bit.BCD, true)
 		0xF9:
 			assert(false, "Opcode $F9 not implemented yet")
 		0xFD:
