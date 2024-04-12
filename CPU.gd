@@ -25,31 +25,83 @@ enum flag_bit {
 enum status {
 	STOPPED, RUNNING, PAUSED, END
 }
+@export_group("Registers")
+@export var A := 0
+@export var X := 0
+@export var Y := 0
+@export var PC := CPUOptions.DEFAULT_INITIAL_PC
+@export var SP := CPUOptions.DEFAULT_INITIAL_SP
 
-# TODO: make these configurable somehow
-const RAM_END := 0x05FF
-const PC_START := 0x0600
-
-# registers
-var A := 0
-var X := 0
-var Y := 0
-var PC := PC_START
-var SP := 0xFF
 var _status := status.STOPPED
-var memory := PackedByteArray()
-var memory_size := 0
-var _init_ram_size := 0
-var opcode := 0
 var flags := 0
+
+@export_group("Memory")
+@export var memory := PackedByteArray()
+@export var memory_size: int = CPUOptions.DEFAULT_RAM_END
+
+@export_group("Processor status")
+@export var carry_flag: bool:
+	get:
+		return get_flag_state(flag_bit.CARRY)
+	set(c):
+		set_flag(flag_bit.CARRY, c)
+
+@export var zero_flag: bool:
+	get:
+		return get_flag_state(flag_bit.ZERO)
+	set(z):
+		set_flag(flag_bit.ZERO, z)
+
+@export var interrupt_flag: bool:
+	get:
+		return get_flag_state(flag_bit.INTERRUPT)
+	set(i):
+		set_flag(flag_bit.INTERRUPT, i)
+
+@export var decimal_flag: bool:
+	get:
+		return get_flag_state(flag_bit.BCD)
+	set(d):
+		set_flag(flag_bit.BCD, d)
+
+@export var break_flag: bool:
+	get:
+		return get_flag_state(flag_bit.BREAK)
+	set(b):
+		set_flag(flag_bit.BREAK, b)
+
+@export var overflow_flag: bool:
+	get:
+		return get_flag_state(flag_bit.OVERFLOW)
+	set(o):
+		set_flag(flag_bit.OVERFLOW, o)
+
+@export var negative_flag: bool:
+	get:
+		return get_flag_state(flag_bit.NEGATIVE)
+	set(n):
+		set_flag(flag_bit.NEGATIVE, n)
+
+@export_group("")
+
+@export var current_opcode := 0
+
+var pc_start: int = CPUOptions.DEFAULT_INITIAL_PC
+var sp_start: int = CPUOptions.DEFAULT_INITIAL_SP
+
 var watched_ranges := [] # each element: [start,end]
 
-func _init(memsize = RAM_END):
-	memory_size = memsize
-	_init_ram_size = memsize
+func setup_opts(opts: CPUOptions):
+	memory_size = opts.ram_end
+	sp_start = opts.sp_start
+	pc_start = opts.pc_start
 	memory.resize(memory_size)
 
+func _init(opts: CPUOptions = CPUOptions.new()):
+	setup_opts(opts)
+
 func _ready():
+	setup_opts(CPUOptions.new())
 	reset()
 
 func get_status() -> status:
@@ -74,30 +126,29 @@ func set_status(new_status: status, no_reset = false):
 	status_changed.emit(_status, old)
 
 func load_rom(bytes:PackedByteArray):
-	memory.resize(PC_START + bytes.size())
+	memory.resize(pc_start + bytes.size())
 	memory_size = memory.size()
 	for b in range(bytes.size()):
-		memory[PC_START + b] = bytes.decode_u8(b)
+		memory[pc_start + b] = bytes.decode_u8(b)
 	rom_loaded.emit(bytes.size())
 
 func unload_rom():
-	memory_size = _init_ram_size if _init_ram_size > PC_START else PC_START
-	memory.resize(_init_ram_size)
-	memory_size = _init_ram_size
-	for b in range(memory_size - PC_START):
-		memory[PC_START + b] = 0
+	memory_size = pc_start
+	memory.resize(memory_size)
+	for b in range(memory_size - pc_start):
+		memory[pc_start + b] = 0
 	rom_unloaded.emit()
 
 func reset(reset_status:status = _status):
 	A = 0
 	X = 0
 	Y = 0
-	PC = PC_START
-	SP = 0xFF
+	PC = pc_start
+	SP = sp_start
 	flags = flag_bit.UNUSED | flag_bit.BREAK
 	set_status(reset_status, true)
 	cpu_reset.emit()
-	var reset_range = PC_START if PC_START < memory_size else memory_size
+	var reset_range = pc_start if pc_start < memory_size else memory_size
 	for i in range(reset_range):
 		memory[i] = 0
 
@@ -161,13 +212,13 @@ func pop_stack_addr() -> int:
 	return (pop_stack() | (pop_stack() << 8)) + 1
 
 func _update_zero(register: int):
-	set_flag(flag_bit.ZERO, register == 0)
+	zero_flag = register == 0
 
 func _update_negative(register: int):
-	set_flag(flag_bit.NEGATIVE, (register & 0x80) > 0)
+	negative_flag = (register & 0x80) > 0
 
 func _update_carry_from_bit_0(val: int):
-	set_flag(flag_bit.CARRY, (val & 1) == 1)
+	carry_flag = (val & 1) == 1
 
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
@@ -180,11 +231,11 @@ func execute(force = false, new_PC = -1):
 		return
 
 	if get_flag_state(flag_bit.BREAK):
-		opcode = pop_byte()
+		current_opcode = pop_byte()
 	else:
-		opcode = 0
+		current_opcode = 0
 
-	match opcode:
+	match current_opcode:
 		0x00: # BRK, implied
 			set_status(status.STOPPED, true)
 		0x01:
@@ -223,7 +274,7 @@ func execute(force = false, new_PC = -1):
 		0x16:
 			assert(false, "Opcode $16 not implemented yet")
 		0x18: # CLC, implied
-			set_flag(flag_bit.CARRY, false)
+			carry_flag = false
 		0x19:
 			assert(false, "Opcode $19 not implemented yet")
 		0x1D:
@@ -271,7 +322,7 @@ func execute(force = false, new_PC = -1):
 		0x36:
 			assert(false, "Opcode $36 not implemented yet")
 		0x38: # SEC, implied
-			set_flag(flag_bit.CARRY, true)
+			carry_flag = true
 		0x39:
 			assert(false, "Opcode $39 not implemented yet")
 		0x3D:
@@ -318,7 +369,7 @@ func execute(force = false, new_PC = -1):
 		0x56:
 			assert(false, "Opcode $56 not implemented yet")
 		0x58: # CLI, implied
-			set_flag(flag_bit.INTERRUPT, false)
+			interrupt_flag = false
 		0x59:
 			assert(false, "Opcode $59 not implemented yet")
 		0x5D:
@@ -354,7 +405,7 @@ func execute(force = false, new_PC = -1):
 		0x76:
 			assert(false, "Opcode $76 not implemented yet")
 		0x78: # SEI, implied
-			set_flag(flag_bit.INTERRUPT, true)
+			interrupt_flag = true
 		0x79:
 			assert(false, "Opcode $79 not implemented yet")
 		0x7D:
@@ -487,7 +538,7 @@ func execute(force = false, new_PC = -1):
 			_update_zero(X)
 			_update_negative(X)
 		0xB8: # CLV, implied
-			set_flag(flag_bit.OVERFLOW, false)
+			overflow_flag = false
 		0xB9: # LDA, absolute, y
 			A = memory[pop_word() + Y]
 			_update_zero(A)
@@ -544,7 +595,7 @@ func execute(force = false, new_PC = -1):
 		0xD6:
 			assert(false, "Opcode $D6 not implemented yet")
 		0xD8: # CLD, implied
-			set_flag(flag_bit.BCD, false)
+			decimal_flag = false
 		0xD9:
 			assert(false, "Opcode $D9 not implemented yet")
 		0xDD:
@@ -584,7 +635,7 @@ func execute(force = false, new_PC = -1):
 		0xF6:
 			assert(false, "Opcode $F6 not implemented yet")
 		0xF8: # SED, implied
-			set_flag(flag_bit.BCD, true)
+			decimal_flag = true
 		0xF9:
 			assert(false, "Opcode $F9 not implemented yet")
 		0xFD:
