@@ -252,11 +252,12 @@ func execute(force = false, new_PC = -1):
 	match current_opcode:
 		0x00: # BRK, implied
 			set_status(status.STOPPED, true)
-		0x01:
-			assert(false, "Not implemented: ORA zero page, x")
+		0x01: # ORA, indexed indirect
+			A |= get_byte(get_indexed_indirect_addr())
+			_update_negative(A)
+			_update_zero(A)
 		0x05: # ORA, zero page
-			var zp := pop_byte()
-			A |= memory[zp]
+			A |= memory[pop_byte()]
 			_update_negative(A)
 			_update_zero(A)
 		0x06:
@@ -264,8 +265,7 @@ func execute(force = false, new_PC = -1):
 		0x08: # PHP, implied
 			push_stack(flags)
 		0x09: # ORA, immediate
-			var num := pop_byte()
-			A |= num
+			A |= pop_byte()
 			_update_negative(A)
 			_update_zero(A)
 		0x0A:
@@ -278,8 +278,8 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $0E not implemented yet")
 		0x10:
 			assert(false, "Opcode $10 not implemented yet")
-		0x11:
-			assert(false, "Opcode $11 not implemented yet")
+		0x11: # ORA, indirect indexed
+			A |= get_byte(get_indirect_indexed_addr())
 		0x15: # ORA, zero page, x
 			A |= memory[get_zpx_addr()]
 			_update_negative(A)
