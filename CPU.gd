@@ -211,6 +211,20 @@ func pop_stack() -> int:
 func pop_stack_addr() -> int:
 	return (pop_stack() | (pop_stack() << 8)) + 1
 
+func get_zpx_addr() -> int:
+	return (pop_byte() + X) & 0xFF
+
+func get_zpy_addr() -> int:
+	return (pop_byte() + Y) & 0xFF
+
+func get_indexed_indirect_addr() -> int:
+	var zp = (pop_byte() + X) & 0xFF
+	return get_word(zp)
+
+func get_indirect_indexed_addr() -> int:
+	var zp := pop_byte()
+	return (get_word(zp) + Y) & 0xFFFF
+
 func _update_zero(register: int):
 	zero_flag = register == 0
 
@@ -267,8 +281,7 @@ func execute(force = false, new_PC = -1):
 		0x11:
 			assert(false, "Opcode $11 not implemented yet")
 		0x15: # ORA, zero page, x
-			var zp := (pop_byte() + X) % 0xFF
-			A |= memory[zp]
+			A |= memory[get_zpx_addr()]
 			_update_negative(A)
 			_update_zero(A)
 		0x16:
@@ -315,8 +328,7 @@ func execute(force = false, new_PC = -1):
 		0x31:
 			assert(false, "Opcode $31 not implemented yet")
 		0x35: # AND, zero page, x
-			var zp := (pop_byte() + X) % 0xFF
-			A &= memory[zp]
+			A &= memory[get_zpx_addr()]
 			_update_negative(A)
 			_update_zero(A)
 		0x36:
@@ -413,18 +425,13 @@ func execute(force = false, new_PC = -1):
 		0x7E:
 			assert(false, "Opcode $7E not implemented yet")
 		0x81: # STA, indexed indirect
-			var zp := (pop_byte() + X) % 0xFF
-			var addr := get_word(zp)
-			set_byte(addr, A)
+			set_byte(get_indexed_indirect_addr(), A)
 		0x84: # STY, zero page
-			var zp = pop_byte()
-			set_byte(zp, Y)
+			set_byte(pop_byte(), Y)
 		0x85: # STA, zero page
-			var zp = pop_byte()
-			set_byte(zp, A)
+			set_byte(pop_byte(), A)
 		0x86: # STX, zero page
-			var zp := pop_byte() % 0xFF
-			set_byte(zp, X)
+			set_byte(pop_byte(), X)
 		0x88: # DEY, implied
 			Y = (Y - 1) & 0xFF
 			_update_negative(Y)
@@ -442,18 +449,13 @@ func execute(force = false, new_PC = -1):
 		0x90:
 			assert(false, "Opcode $90 not implemented yet")
 		0x91: # STA, indirect indexed
-			var zp = pop_byte()
-			var addr = get_word(zp)
-			set_byte(addr+Y, A)
+			set_byte(get_indirect_indexed_addr(), A)
 		0x94: # STY, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
-			set_byte(zp, Y)
+			set_byte(get_zpx_addr(), Y)
 		0x95: # STA, zero page, x
-			var zp = (pop_byte() + X) % 0xFF
-			set_byte(zp, A)
+			set_byte(get_zpx_addr(), A)
 		0x96: # STX, zero page, y
-			var zp := (pop_byte() + Y) % 0xFF
-			set_byte(zp, X)
+			set_byte(get_zpy_addr(), X)
 		0x98: # TYA, implied
 			A = Y
 			_update_zero(A)
@@ -469,9 +471,7 @@ func execute(force = false, new_PC = -1):
 			_update_zero(Y)
 			_update_negative(Y)
 		0xA1: # LDA, indexed indirect
-			var zp = (pop_byte() + X) % 0xFF
-			var addr = get_word(zp)
-			A = memory[addr]
+			A = memory[get_indexed_indirect_addr()]
 			_update_zero(A)
 			_update_negative(A)
 		0xA2: # LDX, immediate
@@ -517,24 +517,19 @@ func execute(force = false, new_PC = -1):
 		0xB0:
 			assert(false, "Opcode $B0 not implemented yet")
 		0xB1: # LDA, indirect indexed
-			var zp := pop_byte()
-			var addr := get_word(zp)
-			A = memory[addr+Y]
+			A = memory[get_indirect_indexed_addr()]
 			_update_zero(A)
 			_update_negative(A)
 		0xB4: # LDY, zero page, x
-			var zp := (pop_byte() + X) % 0xFF
-			Y = memory[zp]
+			Y = memory[get_zpx_addr()]
 			_update_zero(Y)
 			_update_negative(Y)
 		0xB5: # LDA, zero page, x
-			var zp := (pop_byte() + X) % 0xFF
-			A = memory[zp]
+			A = memory[get_zpx_addr()]
 			_update_zero(A)
 			_update_negative(A)
 		0xB6: # LDX, zero page, y
-			var zp := (pop_byte() + Y) % 0xFF
-			X = memory[zp]
+			X = memory[get_zpy_addr()]
 			_update_zero(X)
 			_update_negative(X)
 		0xB8: # CLV, implied
