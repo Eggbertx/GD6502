@@ -280,6 +280,8 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $10 not implemented yet")
 		0x11: # ORA, indirect indexed
 			A |= get_byte(get_indirect_indexed_addr())
+			_update_negative(A)
+			_update_zero(A)
 		0x15: # ORA, zero page, x
 			A |= memory[get_zpx_addr()]
 			_update_negative(A)
