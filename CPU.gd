@@ -234,6 +234,9 @@ func _update_negative(register: int):
 func _update_carry_from_bit_0(val: int):
 	carry_flag = (val & 1) == 1
 
+func _update_carry_from_bit_7(val: int):
+	carry_flag = (val & 8) == 128
+
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
 		return
@@ -260,22 +263,37 @@ func execute(force = false, new_PC = -1):
 			A |= memory[pop_byte()]
 			_update_negative(A)
 			_update_zero(A)
-		0x06:
-			assert(false, "Not implemented: ASL zero page")
+		0x06: # ASL, zero page
+			var zp := pop_byte()
+			var num := get_byte(zp)
+			_update_carry_from_bit_0(num)
+			num = (num << 1) & 0xFF
+			set_byte(zp, num)
+			_update_negative(num)
+			_update_zero(num)
 		0x08: # PHP, implied
 			push_stack(flags)
 		0x09: # ORA, immediate
 			A |= pop_byte()
 			_update_negative(A)
 			_update_zero(A)
-		0x0A:
-			assert(false, "Not implemented: ASL accumulator")
+		0x0A: # ASL, accumulator
+			_update_carry_from_bit_7(A)
+			A = (A << 1) & 0xFF
+			_update_negative(A)
+			_update_zero(A)
 		0x0D: # ORA, absolute
 			A |= memory[pop_word()]
 			_update_negative(A)
 			_update_zero(A)
-		0x0E:
-			assert(false, "Opcode $0E not implemented yet")
+		0x0E: # ASL, absolute
+			var addr := pop_word()
+			var num := get_byte(addr)
+			_update_carry_from_bit_0(num)
+			num = (num << 1) & 0xFF
+			set_byte(addr, num)
+			_update_negative(num)
+			_update_zero(num)
 		0x10:
 			assert(false, "Opcode $10 not implemented yet")
 		0x11: # ORA, indirect indexed
@@ -286,16 +304,28 @@ func execute(force = false, new_PC = -1):
 			A |= memory[get_zpx_addr()]
 			_update_negative(A)
 			_update_zero(A)
-		0x16:
-			assert(false, "Opcode $16 not implemented yet")
+		0x16: # ASL, zero page, x
+			var zp := get_zpx_addr()
+			var num := get_byte(zp)
+			_update_carry_from_bit_0(num)
+			num = (num << 1) & 0xFF
+			set_byte(zp, num)
+			_update_negative(num)
+			_update_zero(num)
 		0x18: # CLC, implied
 			carry_flag = false
 		0x19:
 			assert(false, "Opcode $19 not implemented yet")
 		0x1D:
 			assert(false, "Opcode $1D not implemented yet")
-		0x1E:
-			assert(false, "Opcode $1E not implemented yet")
+		0x1E: # ASL, absolute, x
+			var addr := (pop_word() + X) & 0xFFFF
+			var num := get_byte(addr)
+			_update_carry_from_bit_0(num)
+			num = (num << 1) & 0xFF
+			set_byte(addr, num)
+			_update_negative(num)
+			_update_zero(num)
 		0x20: # JSR, absolute
 			push_stack_addr(PC+1)
 			PC = pop_word()
