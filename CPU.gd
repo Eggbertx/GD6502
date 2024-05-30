@@ -329,8 +329,10 @@ func execute(force = false, new_PC = -1):
 		0x20: # JSR, absolute
 			push_stack_addr(PC+1)
 			PC = pop_word()
-		0x21:
-			assert(false, "Opcode $21 not implemented yet")
+		0x21: # AND, indexed indirect
+			A &= get_byte(get_indexed_indirect_addr())
+			_update_negative(A)
+			_update_zero(A)
 		0x24:
 			assert(false, "Opcode $24 not implemented yet")
 		0x25: # AND, zero page
@@ -357,8 +359,10 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $2E not implemented yet")
 		0x30:
 			assert(false, "Opcode $30 not implemented yet")
-		0x31:
-			assert(false, "Opcode $31 not implemented yet")
+		0x31: # AND, indirect indexed
+			A &= get_byte(get_indirect_indexed_addr())
+			_update_negative(A)
+			_update_zero(A)
 		0x35: # AND, zero page, x
 			A &= memory[get_zpx_addr()]
 			_update_negative(A)
