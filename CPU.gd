@@ -314,10 +314,18 @@ func execute(force = false, new_PC = -1):
 			_update_zero(num)
 		0x18: # CLC, implied
 			carry_flag = false
-		0x19:
-			assert(false, "Opcode $19 not implemented yet")
-		0x1D:
-			assert(false, "Opcode $1D not implemented yet")
+		0x19: # ORA, absolute, y
+			var addr := (pop_word() + Y) & 0xFFFF
+			var num := get_byte(addr)
+			A = (A | num) & 0xFF
+			_update_negative(A)
+			_update_zero(A)
+		0x1D: # ORA, absolute, x
+			var addr := (pop_word() + X) & 0xFFFF
+			var num := get_byte(addr)
+			A = (A | num) & 0xFF
+			_update_negative(A)
+			_update_zero(A)
 		0x1E: # ASL, absolute, x
 			var addr := (pop_word() + X) & 0xFFFF
 			var num := get_byte(addr)
