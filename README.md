@@ -5,10 +5,10 @@ To add GD6502 to your project (assuming you're using Git), add it as a submodule
 
 To limit dependences, unit tests for this project are stored in the [GD6502-IDE](https://github.com/Eggbertx/GD6502-IDE) repository.
 
-## Opcodes
-Here is a table of the implemented opcodes. An empty checkbox means that it hasn't been implemented yet.
-A table cell with no checkbox represents an addressing mode that does not exist for the respective instruction.
-Y indicates an implemented opcode and N indicates an opcode that hasn't been implemented yet
+## Opcode table
+* Empty table cells represent addressing modes that do not exist for their respective instructions.
+* Y indicates an implemented opcode.
+* N indicates an opcode that hasn't been implemented yet
 
 Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZPY | REL | IND
 ------------|-----|-----|-----|-----|-----|------|------|------|------|-----|-----|-----|------
@@ -46,7 +46,7 @@ LDX         |     |     |  Y  |  Y  |  Y  |      |  Y   |      |      |     |  Y
 LDY         |     |     |  Y  |  Y  |  Y  |  Y   |      |      |      |  N  |     |     |    
 LSR         |     |  Y  |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
 NOP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-ORA         |     |     |  Y  |  Y  |  Y  |  N   |  N   |  Y   |  Y   |  Y  |     |     |    
+ORA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 PHA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 PHP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 PLA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
