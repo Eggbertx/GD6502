@@ -8,62 +8,63 @@ To limit dependences, unit tests for this project are stored in the [GD6502-IDE]
 ## Opcodes
 Here is a table of the implemented opcodes. An empty checkbox means that it hasn't been implemented yet.
 A table cell with no checkbox represents an addressing mode that does not exist for the respective instruction.
+Y indicates an implemented opcode and N indicates an opcode that hasn't been implemented yet
 
 Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZPY | REL | IND
 ------------|-----|-----|-----|-----|-----|------|------|------|------|-----|-----|-----|------
-ADC         |     |     |  ☐  |  ☐  |  ☐  |  ☐   |  ☐   |  ☐   |  ☐   |  ☐  |     |     |    
-AND         |     |     |  ☐  |  ☑  |  ☑  |  ☐   |  ☐   |  ☐   |  ☐   |  ☑  |     |     |    
-ASL         |     |  ☑  |  ☑  |  ☑  |     |  ☑   |      |      |      |  ☑  |     |     |    
-BCC         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BCS         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BEQ         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BIT         |     |     |  ☐  |  ☐  |     |      |      |      |      |     |     |     |    
-BMI         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BNE         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BPL         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BRK         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-BVC         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-BVS         |     |     |     |     |     |      |      |      |      |     |     |  ☐  |    
-CLC         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-CLD         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-CLI         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-CLV         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-CMP         |     |     |  ☐  |  ☐  |  ☐  |  ☐   |  ☐   |  ☐   |  ☐   |  ☐  |     |     |    
-CPX         |     |     |  ☐  |  ☐  |  ☐  |      |      |      |      |     |     |     |    
-CPY         |     |     |  ☐  |  ☐  |  ☐  |      |      |      |      |     |     |     |    
-DEC         |     |     |  ☐  |  ☑  |     |  ☐   |      |      |      |  ☐  |     |     |    
-DEX         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-DEY         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-EOR         |     |     |  ☐  |  ☐  |  ☐  |  ☐   |  ☐   |  ☐   |  ☐   |  ☐  |     |     |    
-INC         |     |     |  ☐  |  ☐  |     |  ☐   |      |      |      |  ☐  |     |     |    
-INX         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-INY         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-JMP         |     |     |  ☑  |     |     |      |      |      |      |     |     |     |  ☐ 
-JSR         |     |     |  ☑  |     |     |      |      |      |      |     |     |     |    
-LDA         |     |     |  ☑  |  ☑  |  ☑  |  ☑   |  ☑   |  ☑   |  ☑   |  ☑  |     |     |    
-LDX         |     |     |  ☑  |  ☑  |  ☑  |      |  ☑   |      |      |     |  ☑  |     |    
-LDY         |     |     |  ☑  |  ☑  |  ☑  |  ☑   |      |      |      |  ☐  |     |     |    
-LSR         |  ☑  |  ☑  |  ☐  |  ☑  |     |  ☐   |      |      |      |  ☐  |     |     |    
-NOP         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-ORA         |     |     |  ☑  |  ☑  |  ☑  |  ☑   |  ☑   |  ☑   |  ☑   |  ☑  |     |     |    
-PHA         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-PHP         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-PLA         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-PLP         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-ROL         |  ☐  |  ☐  |  ☐  |  ☐  |     |  ☐   |      |      |      |  ☐  |     |     |    
-ROR         |  ☐  |  ☐  |  ☐  |  ☐  |     |  ☐   |      |      |      |  ☐  |     |     |    
-RTI         |  ☐  |     |     |     |     |      |      |      |      |     |     |     |    
-RTS         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-SBC         |     |     |  ☐  |  ☐  |  ☐  |  ☐   |  ☐   |  ☐   |  ☐   |  ☐  |     |     |    
-SEC         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-SED         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-SEI         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-STA         |     |     |  ☑  |  ☑  |     |  ☑   |  ☑   |  ☑   |  ☑   |  ☑  |     |     |    
-STX         |     |     |  ☑  |  ☑  |     |      |      |      |      |     |  ☑  |     |    
-STY         |     |     |  ☑  |  ☑  |     |      |      |      |      |  ☑  |     |     |    
-TAX         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-TAY         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-TSX         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-TXA         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-TXS         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
-TYA         |  ☑  |     |     |     |     |      |      |      |      |     |     |     |    
+ADC         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+AND         |     |     |  N  |  Y  |  Y  |  N   |  N   |  Y   |  Y   |  Y  |     |     |    
+ASL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
+BCC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BCS         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BEQ         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BIT         |     |     |  N  |  N  |     |      |      |      |      |     |     |     |    
+BMI         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BNE         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BPL         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BRK         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+BVC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BVS         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+CLC         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+CLD         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+CLI         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+CLV         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+CMP         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+CPX         |     |     |  N  |  N  |  N  |      |      |      |      |     |     |     |    
+CPY         |     |     |  N  |  N  |  N  |      |      |      |      |     |     |     |    
+DEC         |     |     |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
+DEX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+DEY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+EOR         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+INC         |     |     |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
+INX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+INY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+JMP         |     |     |  Y  |     |     |      |      |      |      |     |     |     |  N 
+JSR         |     |     |  Y  |     |     |      |      |      |      |     |     |     |    
+LDA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
+LDX         |     |     |  Y  |  Y  |  Y  |      |  Y   |      |      |     |  Y  |     |    
+LDY         |     |     |  Y  |  Y  |  Y  |  Y   |      |      |      |  N  |     |     |    
+LSR         |     |  Y  |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
+NOP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+ORA         |     |     |  Y  |  Y  |  Y  |  N   |  N   |  Y   |  Y   |  Y  |     |     |    
+PHA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+PHP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+PLA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+PLP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+ROL         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
+ROR         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
+RTI         |  N  |     |     |     |     |      |      |      |      |     |     |     |    
+RTS         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+SBC         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+SEC         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+SED         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+SEI         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+STA         |     |     |  Y  |  Y  |     |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
+STX         |     |     |  Y  |  Y  |     |      |      |      |      |     |  Y  |     |    
+STY         |     |     |  Y  |  Y  |     |      |      |      |      |  Y  |     |     |    
+TAX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+TAY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+TSX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+TXA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+TXS         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
+TYA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    

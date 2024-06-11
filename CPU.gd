@@ -346,7 +346,7 @@ func execute(force = false, new_PC = -1):
 			flags = pop_stack()
 		0x29: # AND, immediate
 			var imm := pop_byte()
-			A &= imm
+			A = (A & imm) & 0xFF
 			_update_negative(A)
 			_update_zero(A)
 		0x2A:
