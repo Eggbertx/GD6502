@@ -12,7 +12,7 @@ To limit dependences, unit tests for this project are stored in the [GD6502-IDE]
 
 Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZPY | REL | IND
 ------------|-----|-----|-----|-----|-----|------|------|------|------|-----|-----|-----|------
-ADC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  N   |  Y  |     |     |    
+ADC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 AND         |     |     |  N  |  Y  |  Y  |  N   |  N   |  Y   |  Y   |  Y  |     |     |    
 ASL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 BCC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    

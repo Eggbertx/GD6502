@@ -497,8 +497,9 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $6E not implemented yet")
 		0x70:
 			assert(false, "Opcode $70 not implemented yet")
-		0x71:
-			assert(false, "Opcode $71 not implemented yet")
+		0x71: # ADC, zero page, y
+			var num = memory[get_zpy_addr()]
+			_adc(num)
 		0x75: # ADC, zero page, x
 			var num := memory[get_zpx_addr()]
 			_adc(num)
