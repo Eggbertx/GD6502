@@ -343,9 +343,9 @@ func execute(force = false, new_PC = -1):
 			_update_zero(A)
 		0x24: # BIT, zero page
 			var num := memory[pop_byte()]
-			set_flag(flag_bit.NEGATIVE, num & 0x80 == 0x80)
-			set_flag(flag_bit.OVERFLOW, num & 0x40 == 0x40)
-			set_flag(flag_bit.ZERO, num & A)
+			negative_flag = num & 0x80 == 0x80
+			overflow_flag = num & 0x40 == 0x40
+			zero_flag = num & A
 		0x25: # AND, zero page
 			var num := memory[pop_byte()]
 			A &= num
@@ -364,9 +364,9 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $2A not implemented yet")
 		0x2C: # BIT, absolute
 			var num := memory[pop_word()]
-			set_flag(flag_bit.NEGATIVE, num & 0x80 == 0x80)
-			set_flag(flag_bit.OVERFLOW, num & 0x40 == 0x40)
-			set_flag(flag_bit.ZERO, num & A)
+			negative_flag = num & 0x80 == 0x80
+			overflow_flag = num & 0x40 == 0x40
+			zero_flag = num & A
 		0x2D:
 			assert(false, "Opcode $2D not implemented yet")
 		0x2E:
