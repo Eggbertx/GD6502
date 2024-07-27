@@ -237,6 +237,39 @@ func _update_carry_from_bit_0(val: int):
 func _update_carry_from_bit_7(val: int):
 	carry_flag = (val & 8) == 128
 
+func _adc(val:int):
+	# partially based on Easy6502's testADC function
+	overflow_flag = (A ^ val) & 0xF0 > 0
+	var res = 0
+	if decimal_flag:
+		res = (A & 0xF) + (val & 0xF) + (flags & flag_bit.CARRY)
+		if res >= 0xA:
+			res = 0x10 | ((res + 6) & 0xF)
+		res += (A & 0xF0) + (val & 0xF0)
+		if res >= 0xA0:
+			carry_flag = true
+			if overflow_flag and res >= 0x180:
+				overflow_flag = false
+			res += 0x60
+		else:
+			carry_flag = false
+			if overflow_flag and res < 0x80:
+				overflow_flag = false
+	else:
+		res = A + val + (flags & flag_bit.CARRY)
+		if res > 0xFF:
+			carry_flag = true
+			if overflow_flag and res >= 0x180:
+				overflow_flag = false
+		else:
+			carry_flag = false
+			if overflow_flag and res >= 0x80:
+				overflow_flag = false
+	A = res & 0xFF
+	_update_zero(A)
+	_update_negative(A)
+
+
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
 		return
@@ -440,38 +473,45 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $5E not implemented yet")
 		0x60: # RTS, implied
 			PC = pop_stack_addr()
-		0x61:
-			assert(false, "Opcode $61 not implemented yet")
-		0x65:
-			assert(false, "Opcode $65 not implemented yet")
+		0x61: # ADC, indexed indirect
+			var num = memory[get_indexed_indirect_addr()]
+			_adc(num)
+		0x65: # ADC, zero page
+			var num := memory[pop_byte()]
+			_adc(num)
 		0x66:
 			assert(false, "Opcode $66 not implemented yet")
 		0x68: # PLA, implied
 			A = pop_stack()
-		0x69:
-			assert(false, "Opcode $69 not implemented yet")
+		0x69: # ADC, immediate
+			var num := pop_byte()
+			_adc(num)
 		0x6A:
 			assert(false, "Opcode $6A not implemented yet")
 		0x6C:
 			assert(false, "Opcode $6C not implemented yet")
-		0x6D:
-			assert(false, "Opcode $6D not implemented yet")
+		0x6D: # ADC, absolute
+			var num := memory[pop_word()]
+			_adc(num)
 		0x6E:
 			assert(false, "Opcode $6E not implemented yet")
 		0x70:
 			assert(false, "Opcode $70 not implemented yet")
 		0x71:
 			assert(false, "Opcode $71 not implemented yet")
-		0x75:
-			assert(false, "Opcode $75 not implemented yet")
+		0x75: # ADC, zero page, x
+			var num := memory[get_zpx_addr()]
+			_adc(num)
 		0x76:
 			assert(false, "Opcode $76 not implemented yet")
 		0x78: # SEI, implied
 			interrupt_flag = true
-		0x79:
-			assert(false, "Opcode $79 not implemented yet")
-		0x7D:
-			assert(false, "Opcode $7D not implemented yet")
+		0x79: # ADC, absolute, y
+			var num := memory[pop_word() + Y]
+			_adc(num)
+		0x7D: # ADC, absolute, x
+			var num := memory[pop_word() + X]
+			_adc(num)
 		0x7E:
 			assert(false, "Opcode $7E not implemented yet")
 		0x81: # STA, indexed indirect
