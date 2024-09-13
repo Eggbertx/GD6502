@@ -55,7 +55,7 @@ ROL         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |   
 ROR         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
 RTI         |  N  |     |     |     |     |      |      |      |      |     |     |     |    
 RTS         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-SBC         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+SBC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 SEC         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 SED         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 SEI         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    

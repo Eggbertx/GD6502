@@ -173,7 +173,7 @@ func push_word(byte:int):
 	push_byte((byte >> 8) & 0xFF)
 
 func get_byte(addr:int) -> int:
-	if addr >= memory_size:
+	if addr >= memory_size or addr < 0:
 		return 0
 	elif addr == 0xfe:
 		return randi_range(0, 255)
@@ -226,7 +226,7 @@ func get_indirect_indexed_addr() -> int:
 	return (get_word(zp) + Y) & 0xFFFF
 
 func _update_zero(register: int):
-	zero_flag = register == 0
+	zero_flag = (register & 0xFF) == 0
 
 func _update_negative(register: int):
 	negative_flag = (register & 0x80) > 0
@@ -238,37 +238,44 @@ func _update_carry_from_bit_7(val: int):
 	carry_flag = (val & 8) == 128
 
 func _adc(val:int):
-	# partially based on Easy6502's testADC function
-	overflow_flag = (A ^ val) & 0xF0 > 0
-	var res = 0
 	if decimal_flag:
-		res = (A & 0xF) + (val & 0xF) + (flags & flag_bit.CARRY)
-		if res >= 0xA:
-			res = 0x10 | ((res + 6) & 0xF)
-		res += (A & 0xF0) + (val & 0xF0)
-		if res >= 0xA0:
-			carry_flag = true
-			if overflow_flag and res >= 0x180:
-				overflow_flag = false
-			res += 0x60
-		else:
-			carry_flag = false
-			if overflow_flag and res < 0x80:
-				overflow_flag = false
+		var low_nibble := (A & 0x0F) + (val & 0x0F) + (flags & flag_bit.CARRY)
+		var high_nibble := (A & 0xF0) + (val & 0xF0)
+		if low_nibble > 0x09:
+			high_nibble += 0x10
+			low_nibble += 0x06
+		overflow_flag = ~(A ^ val) & (A ^ high_nibble) & 0x80
+		if high_nibble > 0x90:
+			high_nibble += 0x60;
+		carry_flag = high_nibble & 0xFF00
+		A = (low_nibble & 0x0F) + (high_nibble & 0xF0)
 	else:
-		res = A + val + (flags & flag_bit.CARRY)
-		if res > 0xFF:
-			carry_flag = true
-			if overflow_flag and res >= 0x180:
-				overflow_flag = false
-		else:
-			carry_flag = false
-			if overflow_flag and res >= 0x80:
-				overflow_flag = false
-	A = res & 0xFF
-	_update_zero(A)
+		var sum := A + val + (flags & flag_bit.CARRY)
+		overflow_flag = ~(A ^ val) & (A ^ sum) & 0x80
+		carry_flag = sum & 0xFF00 > 0
+		A = sum & 0xFF
 	_update_negative(A)
+	_update_zero(A)
 
+
+func _sbc(val:int):
+	var diff := A - val - (1 - flags & flag_bit.CARRY)
+	overflow_flag = (A ^ val) & (A ^ diff) & 0x80
+
+	if decimal_flag:
+		var low_nibble := (A & 0x0F) - (val & 0x0F) - (1 - flags & flag_bit.CARRY)
+		var high_nibble := (A & 0xF0) - (val & 0xF0)
+		if low_nibble & 0x10 > 0:
+			low_nibble -= 6
+			high_nibble -= 1
+		if high_nibble & 0x0100 > 0:
+			high_nibble -= 0x60;
+		A = (low_nibble & 0x0F) + (high_nibble & 0xF0)
+	else:
+		A = diff & 0xFF
+	carry_flag = (diff & 0xFF00) == 0
+	_update_negative(A)
+	_update_zero(A)
 
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
@@ -690,42 +697,49 @@ func execute(force = false, new_PC = -1):
 			assert(false, "Opcode $DE not implemented yet")
 		0xE0:
 			assert(false, "Opcode $E0 not implemented yet")
-		0xE1:
-			assert(false, "Opcode $E1 not implemented yet")
+		0xE1: # SBC, indirect x
+			var addr := get_indexed_indirect_addr()
+			_sbc(get_byte(addr))
 		0xE4:
 			assert(false, "Opcode $E4 not implemented yet")
-		0xE5:
-			assert(false, "Opcode $E5 not implemented yet")
+		0xE5: # SBC, zero page
+			var zp := pop_byte()
+			_sbc(get_byte(zp))
 		0xE6:
 			assert(false, "Opcode $E6 not implemented yet")
 		0xE8: # INX, implied
 			X = (X + 1) & 0xFF
 			_update_zero(X)
 			_update_negative(X)
-		0xE9:
-			assert(false, "Opcode $E9 not implemented yet")
+		0xE9: # SBC, immediate
+			_sbc(pop_byte())
 		0xEA: # NOP, implied
 			pass
 		0xEC:
 			assert(false, "Opcode $EC not implemented yet")
-		0xED:
-			assert(false, "Opcode $ED not implemented yet")
+		0xED: # SBC, absolute
+			var addr := pop_word()
+			_sbc(get_byte(addr))
 		0xEE:
 			assert(false, "Opcode $EE not implemented yet")
 		0xF0:
 			assert(false, "Opcode $F0 not implemented yet")
-		0xF1:
-			assert(false, "Opcode $F1 not implemented yet")
+		0xF1: # SBC, indirect y
+			var addr := get_indirect_indexed_addr()
+			_sbc(get_byte(addr))
 		0xF5:
-			assert(false, "Opcode $F5 not implemented yet")
+			var zpx := get_zpx_addr()
+			_sbc(get_byte(zpx))
 		0xF6:
 			assert(false, "Opcode $F6 not implemented yet")
 		0xF8: # SED, implied
 			decimal_flag = true
-		0xF9:
-			assert(false, "Opcode $F9 not implemented yet")
-		0xFD:
-			assert(false, "Opcode $FD not implemented yet")
+		0xF9: # SBC, absolute y
+			var addr := pop_word() + Y
+			_sbc(get_byte(addr))
+		0xFD: # SBC, absolute x
+			var addr := pop_word() + X
+			_sbc(get_byte(addr))
 		0xFE:
 			assert(false, "Opcode $FE not implemented yet")
 
