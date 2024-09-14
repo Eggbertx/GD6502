@@ -281,11 +281,11 @@ func _compare(val:int, reg:int):
 	zero_flag = val == reg
 	negative_flag = val == reg
 
-### This function can be overridden to handle non-standard opcodes. Classes extending CPU should NOT call this function.
+### This function can be overridden to handle non-standard opcodes. Child classes should NOT call the base class function.
 func unhandled_opcode(opcode:int):
 	assert(false, "Unhandled opcode: %02X" % opcode)
 
-### This function can be overridden to handle opcodes differently than the standard implementation. Classes extending CPU
+### This function can be overridden to handle opcodes differently than the standard implementation. Child classes
 ### that override this function should return true if the given function is handled by the override, and false otherwise.
 func override_opcode(opcode:int):
 	return false
