@@ -666,13 +666,14 @@ func execute(force = false, new_PC = -1):
 			X = get_byte(pop_word())
 			_update_zero(Y)
 			_update_negative(Y)
-		0xC0:
-			assert(false, "Opcode $C0 not implemented yet")
+		0xC0: # CPY, immediate
+			_compare(pop_byte(), Y)
 		0xC1: # CMP, indirect x
 			var addr = get_indexed_indirect_addr()
 			_compare(get_byte(addr), A)
-		0xC4:
-			assert(false, "Opcode $C4 not implemented yet")
+		0xC4: # CPY, zero page
+			var zp = pop_byte()
+			_compare(get_byte(zp), Y)
 		0xC5: # CMP, zero page
 			var zp := pop_byte()
 			_compare(get_byte(zp), A)
@@ -693,8 +694,9 @@ func execute(force = false, new_PC = -1):
 			X = (X - 1) & 0xFF
 			_update_zero(X)
 			_update_negative(X)
-		0xCC:
-			assert(false, "Opcode $CC not implemented yet")
+		0xCC: # CPY, absolute
+			var addr = pop_word()
+			_compare(get_byte(addr), Y)
 		0xCD: # CMP, absolute
 			var addr = pop_word()
 			_compare(get_byte(addr), A)
@@ -721,13 +723,14 @@ func execute(force = false, new_PC = -1):
 			_compare(get_byte(addr), A)
 		0xDE:
 			assert(false, "Opcode $DE not implemented yet")
-		0xE0:
-			assert(false, "Opcode $E0 not implemented yet")
+		0xE0: # CPX, immediate
+			_compare(pop_byte(), X)
 		0xE1: # SBC, indirect x
 			var addr := get_indexed_indirect_addr()
 			_sbc(get_byte(addr))
-		0xE4:
-			assert(false, "Opcode $E4 not implemented yet")
+		0xE4: # CPX, zero page
+			var zp = pop_byte()
+			_compare(get_byte(zp), X)
 		0xE5: # SBC, zero page
 			var zp := pop_byte()
 			_sbc(get_byte(zp))
@@ -741,8 +744,9 @@ func execute(force = false, new_PC = -1):
 			_sbc(pop_byte())
 		0xEA: # NOP, implied
 			pass
-		0xEC:
-			assert(false, "Opcode $EC not implemented yet")
+		0xEC: # CPX, absolute
+			var addr = pop_word()
+			_compare(get_byte(addr), X)
 		0xED: # SBC, absolute
 			var addr := pop_word()
 			_sbc(get_byte(addr))
