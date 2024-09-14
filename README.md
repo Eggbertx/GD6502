@@ -29,7 +29,7 @@ CLC         |  Y  |     |     |     |     |      |      |      |      |     |   
 CLD         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 CLI         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 CLV         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-CMP         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+CMP         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 CPX         |     |     |  N  |  N  |  N  |      |      |      |      |     |     |     |    
 CPY         |     |     |  N  |  N  |  N  |      |      |      |      |     |     |     |    
 DEC         |     |     |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
