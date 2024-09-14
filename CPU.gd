@@ -37,7 +37,7 @@ var flags := 0
 
 @export_group("Memory")
 @export var memory := PackedByteArray()
-@export var memory_size: int = CPUOptions.DEFAULT_RAM_END
+@export var memory_size := CPUOptions.DEFAULT_RAM_END
 
 @export_group("Processor status")
 @export var carry_flag: bool:
@@ -86,8 +86,8 @@ var flags := 0
 
 @export var current_opcode := 0
 
-var pc_start: int = CPUOptions.DEFAULT_INITIAL_PC
-var sp_start: int = CPUOptions.DEFAULT_INITIAL_SP
+var pc_start := CPUOptions.DEFAULT_INITIAL_PC
+var sp_start := CPUOptions.DEFAULT_INITIAL_SP
 
 var watched_ranges := [] # each element: [start,end]
 
@@ -121,7 +121,7 @@ func set_status(new_status: status, no_reset = false):
 		reset()
 	if _status == new_status:
 		return
-	var old = _status
+	var old := _status
 	_status = new_status
 	status_changed.emit(_status, old)
 
@@ -148,7 +148,7 @@ func reset(reset_status:status = _status):
 	flags = flag_bit.UNUSED | flag_bit.BREAK
 	set_status(reset_status, true)
 	cpu_reset.emit()
-	var reset_range = pc_start if pc_start < memory_size else memory_size
+	var reset_range := pc_start if pc_start < memory_size else memory_size
 	for i in range(reset_range):
 		memory[i] = 0
 
@@ -156,7 +156,7 @@ func reset(reset_status:status = _status):
 func pop_byte() -> int:
 	if PC >= memory.size():
 		return 0
-	var popped = memory[PC] & 0xFF
+	var popped := memory[PC] & 0xFF
 	PC += 1
 	return popped
 
@@ -180,7 +180,7 @@ func get_byte(addr:int) -> int:
 	return memory[addr]
 
 func get_word(pos:int) -> int:
-	return memory[pos&0xFF] | (memory[(pos+1)&0xFF] << 8)
+	return (memory[pos] | (memory[(pos+1)] << 8)) & 0xFFFF
 
 func set_byte(addr:int, value:int):
 	if addr >= memory_size:
@@ -218,7 +218,7 @@ func get_zpy_addr() -> int:
 	return (pop_byte() + Y) & 0xFF
 
 func get_indexed_indirect_addr() -> int:
-	var zp = (pop_byte() + X) & 0xFF
+	var zp := (pop_byte() + X) & 0xFF
 	return get_word(zp)
 
 func get_indirect_indexed_addr() -> int:
@@ -497,7 +497,7 @@ func execute(force = false, new_PC = -1):
 		0x60: # RTS, implied
 			PC = pop_stack_addr()
 		0x61: # ADC, indexed indirect
-			var num = get_byte(get_indexed_indirect_addr())
+			var num := get_byte(get_indexed_indirect_addr())
 			_adc(num)
 		0x65: # ADC, zero page
 			var num := get_byte(pop_byte())
@@ -511,8 +511,10 @@ func execute(force = false, new_PC = -1):
 			_adc(num)
 		0x6A:
 			assert(false, "Opcode $6A not implemented yet")
-		0x6C:
-			assert(false, "Opcode $6C not implemented yet")
+		0x6C: # JMP, indirect
+			var addr := pop_word()
+			var ind_addr := get_word(addr)
+			PC = ind_addr
 		0x6D: # ADC, absolute
 			var num := get_byte(pop_word())
 			_adc(num)
@@ -521,7 +523,7 @@ func execute(force = false, new_PC = -1):
 		0x70:
 			assert(false, "Opcode $70 not implemented yet")
 		0x71: # ADC, zero page, y
-			var num = get_byte(get_zpy_addr())
+			var num := get_byte(get_zpy_addr())
 			_adc(num)
 		0x75: # ADC, zero page, x
 			var num := get_byte(get_zpx_addr())
@@ -669,10 +671,10 @@ func execute(force = false, new_PC = -1):
 		0xC0: # CPY, immediate
 			_compare(pop_byte(), Y)
 		0xC1: # CMP, indirect x
-			var addr = get_indexed_indirect_addr()
+			var addr := get_indexed_indirect_addr()
 			_compare(get_byte(addr), A)
 		0xC4: # CPY, zero page
-			var zp = pop_byte()
+			var zp := pop_byte()
 			_compare(get_byte(zp), Y)
 		0xC5: # CMP, zero page
 			var zp := pop_byte()
@@ -695,31 +697,31 @@ func execute(force = false, new_PC = -1):
 			_update_zero(X)
 			_update_negative(X)
 		0xCC: # CPY, absolute
-			var addr = pop_word()
+			var addr := pop_word()
 			_compare(get_byte(addr), Y)
 		0xCD: # CMP, absolute
-			var addr = pop_word()
+			var addr := pop_word()
 			_compare(get_byte(addr), A)
 		0xCE:
 			assert(false, "Opcode $CE not implemented yet")
 		0xD0:
 			assert(false, "Opcode $D0 not implemented yet")
 		0xD1: # CMP, indirect y
-			var addr = get_indirect_indexed_addr()
-			var val = get_byte(addr)
+			var addr := get_indirect_indexed_addr()
+			var val := get_byte(addr)
 			_compare(val, A)
 		0xD5: # CMP, zero page x
-			var zp = get_zpx_addr()
+			var zp := get_zpx_addr()
 			_compare(get_byte(zp), A)
 		0xD6:
 			assert(false, "Opcode $D6 not implemented yet")
 		0xD8: # CLD, implied
 			decimal_flag = false
 		0xD9: # CMP, absolute y
-			var addr = (pop_word() + Y) & 0xFFFF
+			var addr := (pop_word() + Y) & 0xFFFF
 			_compare(get_byte(addr), A)
 		0xDD: # CMP, absolute x
-			var addr = (pop_word() + X) & 0xFFFF
+			var addr := (pop_word() + X) & 0xFFFF
 			_compare(get_byte(addr), A)
 		0xDE:
 			assert(false, "Opcode $DE not implemented yet")
@@ -729,7 +731,7 @@ func execute(force = false, new_PC = -1):
 			var addr := get_indexed_indirect_addr()
 			_sbc(get_byte(addr))
 		0xE4: # CPX, zero page
-			var zp = pop_byte()
+			var zp := pop_byte()
 			_compare(get_byte(zp), X)
 		0xE5: # SBC, zero page
 			var zp := pop_byte()
@@ -745,7 +747,7 @@ func execute(force = false, new_PC = -1):
 		0xEA: # NOP, implied
 			pass
 		0xEC: # CPX, absolute
-			var addr = pop_word()
+			var addr := pop_word()
 			_compare(get_byte(addr), X)
 		0xED: # SBC, absolute
 			var addr := pop_word()

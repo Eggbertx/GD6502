@@ -39,7 +39,7 @@ EOR         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |   
 INC         |     |     |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
 INX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 INY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-JMP         |     |     |  Y  |     |     |      |      |      |      |     |     |     |  N 
+JMP         |     |     |  Y  |     |     |      |      |      |      |     |     |     |  Y 
 JSR         |     |     |  Y  |     |     |      |      |      |      |     |     |     |    
 LDA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 LDX         |     |     |  Y  |  Y  |  Y  |      |  Y   |      |      |     |  Y  |     |    
