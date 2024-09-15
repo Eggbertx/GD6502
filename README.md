@@ -32,10 +32,10 @@ CLV         |  Y  |     |     |     |     |      |      |      |      |     |   
 CMP         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 CPX         |     |     |  Y  |  Y  |  Y  |      |      |      |      |     |     |     |    
 CPY         |     |     |  Y  |  Y  |  Y  |      |      |      |      |     |     |     |    
-DEC         |     |     |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
+DEC         |     |     |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 DEX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 DEY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-EOR         |     |     |  N  |  N  |  N  |  N   |  N   |  N   |  N   |  N  |     |     |    
+EOR         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 INC         |     |     |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
 INX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 INY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
