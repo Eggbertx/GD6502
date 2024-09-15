@@ -36,14 +36,14 @@ DEC         |     |     |  Y  |  Y  |     |  Y   |      |      |      |  Y  |   
 DEX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 DEY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 EOR         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
-INC         |     |     |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
+INC         |     |     |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 INX         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 INY         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 JMP         |     |     |  Y  |     |     |      |      |      |      |     |     |     |  Y 
 JSR         |     |     |  Y  |     |     |      |      |      |      |     |     |     |    
 LDA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 LDX         |     |     |  Y  |  Y  |  Y  |      |  Y   |      |      |     |  Y  |     |    
-LDY         |     |     |  Y  |  Y  |  Y  |  Y   |      |      |      |  N  |     |     |    
+LDY         |     |     |  Y  |  Y  |  Y  |  Y   |      |      |      |  Y  |     |     |    
 LSR         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 NOP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 ORA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
@@ -53,7 +53,7 @@ PLA         |  Y  |     |     |     |     |      |      |      |      |     |   
 PLP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 ROL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 ROR         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
-RTI         |  N  |     |     |     |     |      |      |      |      |     |     |     |    
+RTI         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 RTS         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 SBC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 SEC         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
