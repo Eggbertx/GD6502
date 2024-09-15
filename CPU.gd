@@ -281,6 +281,29 @@ func _compare(val:int, reg:int):
 	zero_flag = val == reg
 	negative_flag = val == reg
 
+func _rol(val:int) -> int:
+	var carry := flags & flag_bit.CARRY
+	flags = (flags & (~flag_bit.CARRY)) | ((val & 0x80) >> 7)
+	val = ((val << 1) & 0xFE) | carry
+	_update_negative(val)
+	_update_zero(val)
+	return val
+
+func _ror(val:int) -> int:
+	var carry := flags & flag_bit.CARRY
+	flags = (flags & (~flag_bit.CARRY)) | (val & 1)
+	val = (val >> 1) | (carry << 7)
+	_update_negative(val)
+	_update_zero(val)
+	return val
+
+func _lsr(val:int) -> int:
+	flags = (flags & (~flag_bit.CARRY)) | (val & 1)
+	val = val >> 1
+	_update_negative(val)
+	_update_zero(val)
+	return val
+
 ### This function can be overridden to handle non-standard opcodes. Child classes should NOT call the base class function.
 func unhandled_opcode(opcode:int):
 	assert(false, "Unhandled opcode: %02X" % opcode)
@@ -407,8 +430,10 @@ func execute(force = false, new_PC = -1):
 			A &= num
 			_update_negative(A)
 			_update_zero(A)
-		0x26:
-			assert(false, "Opcode $26 not implemented yet")
+		0x26: # ROL, zero page
+			var zp := pop_byte()
+			var val := get_byte(zp)
+			set_byte(zp, _rol(val))
 		0x28: # PLP, implied
 			flags = pop_stack()
 		0x29: # AND, immediate
@@ -416,17 +441,22 @@ func execute(force = false, new_PC = -1):
 			A = (A & imm) & 0xFF
 			_update_negative(A)
 			_update_zero(A)
-		0x2A:
-			assert(false, "Opcode $2A not implemented yet")
+		0x2A: # ROL, accumulator
+			A = _rol(A)
 		0x2C: # BIT, absolute
 			var num := get_byte(pop_word())
 			negative_flag = num & 0x80 == 0x80
 			overflow_flag = num & 0x40 == 0x40
 			zero_flag = num & A
-		0x2D:
-			assert(false, "Opcode $2D not implemented yet")
-		0x2E:
-			assert(false, "Opcode $2E not implemented yet")
+		0x2D: # AND, absolute
+			var num := get_byte(pop_word())
+			A &= num
+			_update_negative(A)
+			_update_zero(A)
+		0x2E: # ROL, absolute
+			var addr := pop_word()
+			var val := get_byte(addr)
+			set_byte(addr, _rol(val))
 		0x30:
 			assert(false, "Opcode $30 not implemented yet")
 		0x31: # AND, indirect indexed
@@ -437,16 +467,26 @@ func execute(force = false, new_PC = -1):
 			A &= get_byte(get_zpx_addr())
 			_update_negative(A)
 			_update_zero(A)
-		0x36:
-			assert(false, "Opcode $36 not implemented yet")
+		0x36: # ROL, zero page x
+			var zpx := get_zpx_addr()
+			var val := get_byte(zpx)
+			set_byte(zpx, _rol(val))
 		0x38: # SEC, implied
 			carry_flag = true
-		0x39:
-			assert(false, "Opcode $39 not implemented yet")
-		0x3D:
-			assert(false, "Opcode $3D not implemented yet")
-		0x3E:
-			assert(false, "Opcode $3E not implemented yet")
+		0x39: # AND, absolute y
+			var addr := (pop_word() + Y) & 0xFFFF
+			A &= get_byte(addr)
+			_update_negative(A)
+			_update_zero(A)
+		0x3D: # AND, absolute x
+			var addr := (pop_word() + X) & 0xFFFF
+			A &= get_byte(addr)
+			_update_negative(A)
+			_update_zero(A)
+		0x3E: # ROL, absolute x
+			var addr := (pop_word() + X) & 0xFFFF
+			var val := get_byte(addr)
+			set_byte(addr, _rol(val))
 		0x40:
 			assert(false, "Opcode $40 not implemented yet")
 		0x41:
@@ -456,44 +496,43 @@ func execute(force = false, new_PC = -1):
 		0x46: # LSR, zero page
 			var zp := pop_byte()
 			var num := get_byte(zp)
-			_update_carry_from_bit_0(num)
-			num = (num >> 1) & 0xFF
-			set_byte(zp, num)
-			_update_negative(num)
-			_update_zero(num)
+			set_byte(zp, _lsr(num))
 		0x48: # PHA, implied
 			push_stack(A)
 		0x49:
 			assert(false, "Opcode $49 not implemented yet")
 		0x4A: # LSR, accumulator
-			_update_carry_from_bit_0(A)
-			A = (A >> 1) & 0xFF
-			_update_negative(A)
-			_update_zero(A)
+			A = _lsr(A)
 		0x4A:
 			assert(false, "Opcode $4A not implemented yet")
 		0x4C: # JMP, absolute
 			PC = pop_word()
 		0x4D:
 			assert(false, "Opcode $4D not implemented yet")
-		0x4E:
-			assert(false, "Opcode $4E not implemented yet")
+		0x4E: # LSR, absolute
+			var addr := pop_word()
+			var num := get_byte(addr)
+			set_byte(addr, _lsr(num))
 		0x50:
 			assert(false, "Opcode $50 not implemented yet")
 		0x51:
 			assert(false, "Opcode $51 not implemented yet")
 		0x55:
 			assert(false, "Opcode $55 not implemented yet")
-		0x56:
-			assert(false, "Opcode $56 not implemented yet")
+		0x56: # LSR, zero page x
+			var zp := get_zpx_addr()
+			var num := get_byte(zp)
+			set_byte(zp, _lsr(num))
 		0x58: # CLI, implied
 			interrupt_flag = false
 		0x59:
 			assert(false, "Opcode $59 not implemented yet")
 		0x5D:
 			assert(false, "Opcode $5D not implemented yet")
-		0x5E:
-			assert(false, "Opcode $5E not implemented yet")
+		0x5E: # LSR, absolute x
+			var addr := pop_word() + X
+			var num := get_byte(addr)
+			set_byte(addr, _lsr(num))
 		0x60: # RTS, implied
 			PC = pop_stack_addr()
 		0x61: # ADC, indexed indirect
@@ -502,15 +541,17 @@ func execute(force = false, new_PC = -1):
 		0x65: # ADC, zero page
 			var num := get_byte(pop_byte())
 			_adc(num)
-		0x66:
-			assert(false, "Opcode $66 not implemented yet")
+		0x66: # ROR, zero page
+			var zp := pop_byte()
+			var num := get_byte(zp)
+			set_byte(zp, _ror(num))
 		0x68: # PLA, implied
 			A = pop_stack()
 		0x69: # ADC, immediate
 			var num := pop_byte()
 			_adc(num)
-		0x6A:
-			assert(false, "Opcode $6A not implemented yet")
+		0x6A: # ROR, accumulator
+			A = _ror(A)
 		0x6C: # JMP, indirect
 			var addr := pop_word()
 			var ind_addr := get_word(addr)
@@ -518,8 +559,10 @@ func execute(force = false, new_PC = -1):
 		0x6D: # ADC, absolute
 			var num := get_byte(pop_word())
 			_adc(num)
-		0x6E:
-			assert(false, "Opcode $6E not implemented yet")
+		0x6E: # ROR, absolute
+			var addr := pop_word()
+			var num := get_byte(addr)
+			set_byte(addr, _ror(num))
 		0x70:
 			assert(false, "Opcode $70 not implemented yet")
 		0x71: # ADC, zero page, y
@@ -528,8 +571,10 @@ func execute(force = false, new_PC = -1):
 		0x75: # ADC, zero page, x
 			var num := get_byte(get_zpx_addr())
 			_adc(num)
-		0x76:
-			assert(false, "Opcode $76 not implemented yet")
+		0x76: # ROR, zero page x
+			var zp := get_zpx_addr()
+			var num := get_byte(zp)
+			set_byte(zp, _ror(num))
 		0x78: # SEI, implied
 			interrupt_flag = true
 		0x79: # ADC, absolute, y
@@ -538,8 +583,10 @@ func execute(force = false, new_PC = -1):
 		0x7D: # ADC, absolute, x
 			var num := get_byte(pop_word() + X)
 			_adc(num)
-		0x7E:
-			assert(false, "Opcode $7E not implemented yet")
+		0x7E: # ROR, absolute x
+			var addr := pop_word() + X
+			var num := get_byte(addr)
+			set_byte(addr, _ror(num))
 		0x81: # STA, indexed indirect
 			set_byte(get_indexed_indirect_addr(), A)
 		0x84: # STY, zero page

@@ -13,7 +13,7 @@ To limit dependences, unit tests for this project are stored in the [GD6502-IDE]
 Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZPY | REL | IND
 ------------|-----|-----|-----|-----|-----|------|------|------|------|-----|-----|-----|------
 ADC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
-AND         |     |     |  N  |  Y  |  Y  |  N   |  N   |  Y   |  Y   |  Y  |     |     |    
+AND         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 ASL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 BCC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
 BCS         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
@@ -44,15 +44,15 @@ JSR         |     |     |  Y  |     |     |      |      |      |      |     |   
 LDA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 LDX         |     |     |  Y  |  Y  |  Y  |      |  Y   |      |      |     |  Y  |     |    
 LDY         |     |     |  Y  |  Y  |  Y  |  Y   |      |      |      |  N  |     |     |    
-LSR         |     |  Y  |  N  |  Y  |     |  N   |      |      |      |  N  |     |     |    
+LSR         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 NOP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 ORA         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 PHA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 PHP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 PLA         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 PLP         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
-ROL         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
-ROR         |  N  |  N  |  N  |  N  |     |  N   |      |      |      |  N  |     |     |    
+ROL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
+ROR         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
 RTI         |  N  |     |     |     |     |      |      |      |      |     |     |     |    
 RTS         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 SBC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
