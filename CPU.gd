@@ -237,6 +237,14 @@ func _update_carry_from_bit_0(val: int):
 func _update_carry_from_bit_7(val: int):
 	carry_flag = (val & 8) == 128
 
+func _branch(relative_pos:int, condition: bool):
+	if not condition:
+		return
+	if relative_pos & 0x80:
+		PC -= 0x100 - relative_pos
+	else:
+		PC += relative_pos
+
 func _adc(val:int):
 	if decimal_flag:
 		var low_nibble := (A & 0x0F) + (val & 0x0F) + (flags & flag_bit.CARRY)
@@ -625,8 +633,8 @@ func execute(force = false, new_PC = -1):
 			set_byte(pop_word(), A)
 		0x8E: # STX, absolute
 			set_byte(pop_word(), X)
-		0x90:
-			assert(false, "Opcode $90 not implemented yet")
+		0x90: # BCC, relative
+			_branch(pop_byte(), !carry_flag)
 		0x91: # STA, indirect indexed
 			set_byte(get_indirect_indexed_addr(), A)
 		0x94: # STY, zero page, x
@@ -693,8 +701,8 @@ func execute(force = false, new_PC = -1):
 			X = get_byte(pop_word())
 			_update_zero(X)
 			_update_negative(X)
-		0xB0:
-			assert(false, "Opcode $B0 not implemented yet")
+		0xB0: # BCS, relative
+			_branch(pop_byte(), carry_flag)
 		0xB1: # LDA, indirect indexed
 			A = get_byte(get_indirect_indexed_addr())
 			_update_zero(A)
@@ -770,8 +778,8 @@ func execute(force = false, new_PC = -1):
 			set_byte(addr, new_val)
 			_update_zero(new_val)
 			_update_negative(new_val)
-		0xD0:
-			assert(false, "Opcode $D0 not implemented yet")
+		0xD0: # BNE, relative
+			_branch(pop_byte(), !zero_flag)
 		0xD1: # CMP, indirect y
 			var addr := get_indirect_indexed_addr()
 			var val := get_byte(addr)
@@ -828,8 +836,8 @@ func execute(force = false, new_PC = -1):
 			_sbc(get_byte(addr))
 		0xEE:
 			assert(false, "Opcode $EE not implemented yet")
-		0xF0:
-			assert(false, "Opcode $F0 not implemented yet")
+		0xF0: # BEQ, relative
+			_branch(pop_byte(), zero_flag)
 		0xF1: # SBC, indirect y
 			var addr := get_indirect_indexed_addr()
 			_sbc(get_byte(addr))

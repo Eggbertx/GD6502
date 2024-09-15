@@ -15,12 +15,12 @@ Instruction | IMP | ACC | ABS |  ZP | IMM | ABSX | ABSY | INDX | INDY | ZPX | ZP
 ADC         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 AND         |     |     |  Y  |  Y  |  Y  |  Y   |  Y   |  Y   |  Y   |  Y  |     |     |    
 ASL         |     |  Y  |  Y  |  Y  |     |  Y   |      |      |      |  Y  |     |     |    
-BCC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
-BCS         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
-BEQ         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BCC         |     |     |     |     |     |      |      |      |      |     |     |  Y  |    
+BCS         |     |     |     |     |     |      |      |      |      |     |     |  Y  |    
+BEQ         |     |     |     |     |     |      |      |      |      |     |     |  Y  |    
 BIT         |     |     |  Y  |  Y  |     |      |      |      |      |     |     |     |    
 BMI         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
-BNE         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
+BNE         |     |     |     |     |     |      |      |      |      |     |     |  Y  |    
 BPL         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
 BRK         |  Y  |     |     |     |     |      |      |      |      |     |     |     |    
 BVC         |     |     |     |     |     |      |      |      |      |     |     |  N  |    
