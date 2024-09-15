@@ -381,8 +381,8 @@ func execute(force = false, new_PC = -1):
 			set_byte(addr, num)
 			_update_negative(num)
 			_update_zero(num)
-		0x10:
-			assert(false, "Opcode $10 not implemented yet")
+		0x10: # BPL, relative
+			_branch(pop_byte(), !negative_flag)
 		0x11: # ORA, indirect indexed
 			A |= get_byte(get_indirect_indexed_addr())
 			_update_negative(A)
@@ -465,8 +465,8 @@ func execute(force = false, new_PC = -1):
 			var addr := pop_word()
 			var val := get_byte(addr)
 			set_byte(addr, _rol(val))
-		0x30:
-			assert(false, "Opcode $30 not implemented yet")
+		0x30: # BMI, relative
+			_branch(pop_byte(), negative_flag)
 		0x31: # AND, indirect indexed
 			A &= get_byte(get_indirect_indexed_addr())
 			_update_negative(A)
@@ -529,8 +529,8 @@ func execute(force = false, new_PC = -1):
 			var addr := pop_word()
 			var num := get_byte(addr)
 			set_byte(addr, _lsr(num))
-		0x50:
-			assert(false, "Opcode $50 not implemented yet")
+		0x50: # BVC, relative
+			_branch(pop_byte(), !overflow_flag)
 		0x51: # EOR, indirect y
 			A ^= get_byte(get_indirect_indexed_addr())
 			_update_negative(A)
@@ -587,8 +587,8 @@ func execute(force = false, new_PC = -1):
 			var addr := pop_word()
 			var num := get_byte(addr)
 			set_byte(addr, _ror(num))
-		0x70:
-			assert(false, "Opcode $70 not implemented yet")
+		0x70: # BVS, relative
+			_branch(pop_byte(), overflow_flag)
 		0x71: # ADC, zero page, y
 			var num := get_byte(get_zpy_addr())
 			_adc(num)
