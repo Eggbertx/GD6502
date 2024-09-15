@@ -175,8 +175,6 @@ func push_word(byte:int):
 func get_byte(addr:int) -> int:
 	if addr >= memory_size or addr < 0:
 		return 0
-	elif addr == 0xfe:
-		return randi_range(0, 255)
 	return memory[addr]
 
 func get_word(pos:int) -> int:
