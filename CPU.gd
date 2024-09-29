@@ -9,6 +9,7 @@ signal rom_unloaded
 signal watched_memory_changed(location:int, new_val:int)
 signal stack_filled
 signal stack_emptied
+signal illegal_opcode(opcode:int)
 
 # status register bits
 enum flag_bit {
@@ -309,10 +310,6 @@ func _lsr(val:int) -> int:
 	_update_negative(val)
 	_update_zero(val)
 	return val
-
-### This function can be overridden to handle non-standard opcodes. Child classes should NOT call the base class function.
-func unhandled_opcode(opcode:int):
-	assert(false, "Unhandled opcode: %02X" % opcode)
 
 ### This function can be overridden to handle opcodes differently than the standard implementation. Child classes
 ### that override this function should return true if the given function is handled by the override, and false otherwise.
@@ -870,7 +867,7 @@ func execute(force = false, new_PC = -1):
 			_update_negative(new_val)
 			_update_zero(new_val)
 		_:
-			unhandled_opcode(current_opcode)
+			illegal_opcode.emit(current_opcode)
 
 
 func step(steps:int = 1):
