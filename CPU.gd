@@ -26,19 +26,23 @@ enum flag_bit {
 enum status {
 	STOPPED, RUNNING, PAUSED, END
 }
+
+var pc_start := 0xFFFF
+var sp_start := 0xFF
+
 @export_group("Registers")
 @export var A := 0
 @export var X := 0
 @export var Y := 0
-@export var PC := CPUOptions.DEFAULT_INITIAL_PC
-@export var SP := CPUOptions.DEFAULT_INITIAL_SP
+@export var PC := pc_start
+@export var SP := sp_start
 
 var _status := status.STOPPED
 var flags := 0
 
 @export_group("Memory")
 @export var memory := PackedByteArray()
-@export var memory_size := CPUOptions.DEFAULT_RAM_END
+@export var memory_size := 0
 
 @export_group("Processor status")
 @export var carry_flag: bool:
@@ -87,22 +91,21 @@ var flags := 0
 
 @export var current_opcode := 0
 
-var pc_start := CPUOptions.DEFAULT_INITIAL_PC
-var sp_start := CPUOptions.DEFAULT_INITIAL_SP
-
 var watched_ranges := [] # each element: [start,end]
 
-func setup_opts(opts: CPUOptions):
-	memory_size = opts.ram_end
-	sp_start = opts.sp_start
-	pc_start = opts.pc_start
+func _setup_specs():
+	assert(false, "You must override the _setup_specs function in your CPU subclass to set up the CPU's memory size, stack pointer start address, and initial program counter address.")
+	# memory_size = 0x5ff
+	# sp_start = 0xff
+	# pc_start = 0x600
+
+func _init():
+	_setup_specs()
 	memory.resize(memory_size)
 
-func _init(opts: CPUOptions = CPUOptions.new()):
-	setup_opts(opts)
 
 func _ready():
-	setup_opts(CPUOptions.new())
+	_setup_specs()
 	reset()
 
 func get_status() -> status:
