@@ -872,8 +872,3 @@ func execute(force = false, new_PC = -1):
 		_:
 			illegal_opcode.emit(current_opcode)
 
-
-func step(steps:int = 1):
-	_status = status.PAUSED
-	for s in range(steps):
-		execute(true)
