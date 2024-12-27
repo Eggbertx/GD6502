@@ -24,7 +24,7 @@ enum flag_bit {
 }
 
 enum status {
-	STOPPED, RUNNING, PAUSED, END
+	STOPPED, RUNNING, PAUSED, END, THREAD_EXIT
 }
 
 var pc_start := 0xFFFF
@@ -93,6 +93,10 @@ var flags := 0
 
 var watched_ranges := [] # each element: [start,end]
 
+var _thread:Thread
+var _semaphore:Semaphore
+var _mutex:Mutex
+
 func _setup_specs():
 	assert(false, "You must override the _setup_specs function in your CPU subclass to set up the CPU's memory size, stack pointer start address, and initial program counter address.")
 	# memory_size = 0x5ff
@@ -102,11 +106,18 @@ func _setup_specs():
 func _init():
 	_setup_specs()
 	memory.resize(memory_size)
+	_mutex = Mutex.new()
+	_semaphore = Semaphore.new()
+	_thread = Thread.new()
 
 
 func _ready():
 	_setup_specs()
 	reset()
+
+func _exit_tree() -> void:
+	if not _thread.is_alive():
+		_thread.wait_to_finish()
 
 func get_status() -> status:
 	return _status
@@ -311,6 +322,11 @@ func _lsr(val:int) -> int:
 ### that override this function should return true if the given function is handled by the override, and false otherwise.
 func override_opcode(opcode:int):
 	return false
+
+func _thread_loop():
+	while true:
+		_semaphore.wait()
+		execute()
 
 func execute(force = false, new_PC = -1):
 	if _status != status.RUNNING and !force:
