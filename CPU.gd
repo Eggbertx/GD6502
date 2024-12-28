@@ -96,6 +96,7 @@ var watched_ranges := [] # each element: [start,end]
 var _thread:Thread
 var _semaphore:Semaphore
 var _mutex:Mutex
+var thread_running := false
 
 func _setup_specs():
 	assert(false, "You must override the _setup_specs function in your CPU subclass to set up the CPU's memory size, stack pointer start address, and initial program counter address.")
@@ -112,6 +113,7 @@ func _init(threaded = true):
 
 	if threaded:
 		_semaphore.post()
+		thread_running = true
 		_thread.start(_thread_loop)
 
 func _ready():
@@ -119,39 +121,15 @@ func _ready():
 	reset()
 
 func _exit_tree() -> void:
-	_status = status.THREAD_EXIT
+	thread_running = false
 	if not _thread.is_alive():
 		_thread.wait_to_finish()
 	_mutex.unlock()
 
 
 # Thread helper functions
-func _cpu_reset_helper():
-	cpu_reset.emit()
-
-func _illegal_opcode_helper(opcode:int):
-	illegal_opcode.emit(opcode)
-
-func _rom_loaded_helper(size:int):
-	rom_loaded.emit(size)
-
-func _rom_unloaded_helper():
-	rom_unloaded.emit()
-
-func _stack_emptied_helper():
-	stack_emptied.emit()
-
-func _stack_filled_helper():
-	stack_filled.emit()
-
-func _status_changed_helper(new_status:status, old_status:status):
-	status_changed.emit(new_status, old_status)
-
-func _watched_memory_changed_helper(addr:int, new_value:int):
-	watched_memory_changed.emit(addr, new_value)
-
 func _thread_loop():
-	while _status != status.THREAD_EXIT:
+	while thread_running:
 		_semaphore.wait()
 		if _status == status.RUNNING:
 			execute()
@@ -175,7 +153,7 @@ func set_status(new_status: status, no_reset = false):
 		return
 	var old := _status
 	_status = new_status
-	call_deferred("_status_changed_helper", _status, old)
+	status_changed.emit.call_deferred(_status, old)
 
 func load_rom(bytes:PackedByteArray):
 	_mutex.lock()
@@ -184,14 +162,14 @@ func load_rom(bytes:PackedByteArray):
 	for b in range(bytes.size()):
 		memory[pc_start + b] = bytes.decode_u8(b)
 	_mutex.unlock()
-	call_deferred("_rom_loaded_helper", bytes.size())
+	rom_loaded.emit.call_deferred(bytes.size())
 
 func unload_rom():
 	memory_size = pc_start
 	memory.resize(memory_size)
 	for b in range(memory_size - pc_start):
 		memory[pc_start + b] = 0
-	call_deferred("_rom_unloaded_helper")
+	rom_unloaded.emit.call_deferred()
 
 func reset(reset_status:status = _status):
 	A = 0
@@ -201,7 +179,7 @@ func reset(reset_status:status = _status):
 	SP = sp_start
 	flags = flag_bit.UNUSED | flag_bit.BREAK
 	set_status(reset_status, true)
-	call_deferred("_cpu_reset_helper")
+	cpu_reset.emit.call_deferred()
 	var reset_range := pc_start if pc_start < memory_size else memory_size
 	for i in range(reset_range):
 		memory[i] = 0
@@ -240,13 +218,13 @@ func set_byte(addr:int, value:int):
 	memory[addr] = value & 0xFF
 	for watched in watched_ranges:
 		if addr >= watched[0] and addr <= watched[1]:
-			call_deferred("_watched_memory_changed_helper", addr, value)
+			watched_memory_changed.emit.call_deferred(addr, value)
 
 func push_stack(val: int):
 	set_byte(0x100 + (SP & 0xFF), val & 0xFF)
 	SP -= 1
 	if SP < 0:
-		call_deferred("_stack_filled_helper")
+		stack_filled.emit.call_deferred()
 		SP &= 0xFF
 
 func push_stack_addr(addr: int):
@@ -256,7 +234,7 @@ func push_stack_addr(addr: int):
 func pop_stack() -> int:
 	SP += 1
 	if SP > 0xFF:
-		call_deferred("_stack_emptied_helper")
+		stack_emptied.emit.call_deferred()
 		SP &= 0xFF
 	return get_byte(0x100 + SP)
 
@@ -851,7 +829,7 @@ func execute(force = false, new_PC = -1):
 			set_byte(addr, new_val)
 			_update_zero_negative(new_val)
 		_:
-			call_deferred("_illegal_opcode_helper", current_opcode)
+			illegal_opcode.emit.call_deferred(current_opcode)
 
 	# post semaphore to allow the thread to continue
 	_semaphore.post()
