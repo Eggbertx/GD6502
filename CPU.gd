@@ -29,6 +29,11 @@ enum status {
 
 var pc_start := 0xFFFF
 var sp_start := 0xFF
+var target_clock_speed_hz = 10_190_000  # 1.19 MHz for Atari 2600
+var cycle_time_usec: int:
+	get:
+		return 1_000_000 / target_clock_speed_hz
+
 
 @export_group("Registers")
 @export var A := 0
@@ -120,12 +125,13 @@ func _ready():
 	_setup_specs()
 	reset()
 
-func _exit_tree() -> void:
-	thread_running = false
-	if not _thread.is_alive():
-		_thread.wait_to_finish()
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE or what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_status = status.THREAD_EXIT
+		if thread_running:
+			thread_running = false
+			_thread.wait_to_finish()
 	_mutex.unlock()
-
 
 # Thread helper functions
 func _thread_loop():
@@ -133,6 +139,9 @@ func _thread_loop():
 		_semaphore.wait()
 		if _status == status.RUNNING:
 			execute()
+
+func unlock():
+	_mutex.unlock()
 
 func get_status() -> status:
 	return _status
