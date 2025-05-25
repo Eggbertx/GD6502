@@ -2,14 +2,14 @@ extends Node
 
 class_name CPU
 
-signal status_changed
 signal cpu_reset
-signal rom_loaded
-signal rom_unloaded
-signal watched_memory_changed(location:int, new_val:int)
-signal stack_filled
-signal stack_emptied
 signal illegal_opcode(opcode:int)
+signal rom_loaded(bytes:int)
+signal rom_unloaded
+signal stack_emptied
+signal stack_filled
+signal status_changed(new_status:status, old_status:status)
+signal watched_memory_changed(location:int, new_val:int)
 
 # status register bits
 enum flag_bit {
@@ -29,6 +29,8 @@ enum status {
 
 var pc_start := 0xFFFF
 var sp_start := 0xFF
+var target_clock_speed_hz = 1_190_000  # 1.19 MHz for Atari 2600
+
 
 @export_group("Registers")
 @export var A := 0
