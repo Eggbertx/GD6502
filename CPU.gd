@@ -29,7 +29,9 @@ enum status {
 
 var pc_start := 0xFFFF
 var sp_start := 0xFF
-var target_clock_speed_hz = 1_190_000  # 1.19 MHz for Atari 2600
+var nmi_vector := 0xFFFA
+var reset_vector := 0xFFFC
+var irq_vector := 0xFFFE
 
 
 @export_group("Registers")
@@ -100,11 +102,13 @@ func _setup_specs():
 	# memory_size = 0x5ff
 	# sp_start = 0xff
 	# pc_start = 0x600
+	# nmi_vector := 0xFFFA
+	# reset_vector := 0xFFFC
+	# irq_vector := 0xFFFE
 
 func _init():
 	_setup_specs()
 	memory.resize(memory_size)
-
 
 func _ready():
 	_setup_specs()
@@ -309,32 +313,40 @@ func _lsr(val:int) -> int:
 	_update_zero_negative(val)
 	return val
 
-### This function can be overridden to handle opcodes differently than the standard implementation. Child classes
-### that override this function should return true if the given function is handled by the override, and false otherwise.
-func override_opcode(opcode:int):
-	return false
+func crosses_page_boundary(addr1:int, addr2:int) -> bool:
+	return (addr1 & 0xFF00) != (addr2 & 0xFF00)
 
-func execute(force = false, new_PC = -1):
+## This function can be overridden to handle opcodes differently than the standard implementation. Child classes
+## that override this function should return the number of clock cycles that are being emulated if the given
+## function is handled by the override, and 0 otherwise.
+func override_opcode(opcode:int) -> int:
+	return 0
+
+func execute(force = false, new_PC = -1) -> int:
 	if _status != status.RUNNING and !force:
-		return
+		return 0
 	if new_PC > -1:
 		PC = new_PC
 
 	if PC >= memory.size():
 		set_status(status.END)
-		return
+		return 0
 
-	if break_flag:
-		current_opcode = pop_byte()
-	else:
-		current_opcode = 0
+	current_opcode = pop_byte()
 	
-	if override_opcode(current_opcode):
-		return
+	var clock_cycles := override_opcode(current_opcode)
+	if clock_cycles > 0:
+		# opcode handled by subclass, return the clock cycles
+		return clock_cycles
+
+	clock_cycles = 1
 
 	match current_opcode:
 		0x00: # BRK, implied
-			set_status(status.STOPPED, true)
+			# set_status(status.STOPPED, true)
+			push_stack_addr(PC + 1)
+			push_stack(flags | flag_bit.BREAK)
+			flags = flags | flag_bit.INTERRUPT | flag_bit.BREAK
 		0x01: # ORA, indexed indirect
 			A |= get_byte(get_indexed_indirect_addr())
 			_update_zero_negative(A)
@@ -803,3 +815,5 @@ func execute(force = false, new_PC = -1):
 			_update_zero_negative(new_val)
 		_:
 			illegal_opcode.emit(current_opcode)
+
+	return clock_cycles
