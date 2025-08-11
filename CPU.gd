@@ -32,7 +32,7 @@ var sp_start := 0xFF
 var nmi_vector := 0xFFFA
 var reset_vector := 0xFFFC
 var irq_vector := 0xFFFE
-
+var _defer_signals := false # use if instantiated outside of the main thread
 
 @export_group("Registers")
 @export var A := 0
@@ -106,8 +106,9 @@ func _setup_specs():
 	# reset_vector := 0xFFFC
 	# irq_vector := 0xFFFE
 
-func _init():
+func _init(defer_signals: bool = false):
 	_setup_specs()
+	_defer_signals = defer_signals
 	memory.resize(memory_size)
 
 func _ready():
@@ -133,21 +134,30 @@ func set_status(new_status: status, no_reset = false):
 		return
 	var old := _status
 	_status = new_status
-	status_changed.emit(_status, old)
+	if _defer_signals:
+		status_changed.emit.call_deferred(_status, old)
+	else:
+		status_changed.emit(_status, old)
 
 func load_rom(bytes:PackedByteArray):
 	memory.resize(pc_start + bytes.size())
 	memory_size = memory.size()
 	for b in range(bytes.size()):
 		memory[pc_start + b] = bytes.decode_u8(b)
-	rom_loaded.emit(bytes.size())
+	if _defer_signals:
+		rom_loaded.emit.call_deferred(bytes.size())
+	else:
+		rom_loaded.emit(bytes.size())
 
 func unload_rom():
 	memory_size = pc_start
 	memory.resize(memory_size)
 	for b in range(memory_size - pc_start):
 		memory[pc_start + b] = 0
-	rom_unloaded.emit()
+	if _defer_signals:
+		rom_unloaded.emit.call_deferred()
+	else:
+		rom_unloaded.emit()
 
 func reset(reset_status:status = _status):
 	A = 0
@@ -157,7 +167,10 @@ func reset(reset_status:status = _status):
 	SP = sp_start
 	flags = flag_bit.UNUSED | flag_bit.BREAK
 	set_status(reset_status, true)
-	cpu_reset.emit()
+	if _defer_signals:
+		cpu_reset.emit.call_deferred()
+	else:
+		cpu_reset.emit()
 	var reset_range := pc_start if pc_start < memory_size else memory_size
 	for i in range(reset_range):
 		memory[i] = 0
@@ -196,13 +209,19 @@ func set_byte(addr:int, value:int):
 	memory[addr] = value & 0xFF
 	for watched in watched_ranges:
 		if addr >= watched[0] and addr <= watched[1]:
-			watched_memory_changed.emit(addr, value)
+			if _defer_signals:
+				watched_memory_changed.emit.call_deferred(addr, value)
+			else:
+				watched_memory_changed.emit(addr, value)
 
 func push_stack(val: int):
 	set_byte(0x100 + (SP & 0xFF), val & 0xFF)
 	SP -= 1
 	if SP < 0:
-		stack_filled.emit()
+		if _defer_signals:
+			stack_filled.emit.call_deferred()
+		else:
+			stack_filled.emit()
 		SP &= 0xFF
 
 func push_stack_addr(addr: int):
@@ -212,7 +231,10 @@ func push_stack_addr(addr: int):
 func pop_stack() -> int:
 	SP += 1
 	if SP > 0xFF:
-		stack_emptied.emit()
+		if _defer_signals:
+			stack_emptied.emit.call_deferred()
+		else:
+			stack_emptied.emit()
 		SP &= 0xFF
 	return get_byte(0x100 + SP)
 
@@ -339,6 +361,7 @@ func execute(force = false, new_PC = -1) -> int:
 		# opcode handled by subclass, return the clock cycles
 		return clock_cycles
 
+ 	# TODO: properly keep track of the number of clock cycles executed, taking into consideration things like page crossing
 	clock_cycles = 1
 
 	match current_opcode:
@@ -814,6 +837,9 @@ func execute(force = false, new_PC = -1) -> int:
 			set_byte(addr, new_val)
 			_update_zero_negative(new_val)
 		_:
-			illegal_opcode.emit(current_opcode)
+			if _defer_signals:
+				illegal_opcode.emit.call_deferred(current_opcode)
+			else:
+				illegal_opcode.emit(current_opcode)
 
 	return clock_cycles
