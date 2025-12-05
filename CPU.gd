@@ -8,11 +8,10 @@ signal rom_loaded(bytes:int)
 signal rom_unloaded
 signal stack_emptied
 signal stack_filled
-signal status_changed(new_status:status, old_status:status)
+signal status_changed(new_status:EmulationStatus, old_status:EmulationStatus)
 signal watched_memory_changed(location:int, new_val:int)
 
-# status register bits
-enum flag_bit {
+enum FlagBit {
 	CARRY = 1,
 	ZERO = 2,
 	INTERRUPT = 4,
@@ -23,7 +22,7 @@ enum flag_bit {
 	NEGATIVE = 128
 }
 
-enum status {
+enum EmulationStatus {
 	STOPPED, RUNNING, PAUSED, END
 }
 
@@ -41,7 +40,7 @@ var _defer_signals := false # use if instantiated outside of the main thread
 @export var PC := pc_start
 @export var SP := sp_start
 
-var _status := status.STOPPED
+var _status := EmulationStatus.STOPPED
 var flags := 0
 
 @export_group("Memory")
@@ -51,45 +50,45 @@ var flags := 0
 @export_group("Processor status")
 @export var carry_flag: bool:
 	get:
-		return get_flag_state(flag_bit.CARRY)
+		return get_flag_state(FlagBit.CARRY)
 	set(c):
-		set_flag(flag_bit.CARRY, c)
+		set_flag(FlagBit.CARRY, c)
 
 @export var zero_flag: bool:
 	get:
-		return get_flag_state(flag_bit.ZERO)
+		return get_flag_state(FlagBit.ZERO)
 	set(z):
-		set_flag(flag_bit.ZERO, z)
+		set_flag(FlagBit.ZERO, z)
 
 @export var interrupt_flag: bool:
 	get:
-		return get_flag_state(flag_bit.INTERRUPT)
+		return get_flag_state(FlagBit.INTERRUPT)
 	set(i):
-		set_flag(flag_bit.INTERRUPT, i)
+		set_flag(FlagBit.INTERRUPT, i)
 
 @export var decimal_flag: bool:
 	get:
-		return get_flag_state(flag_bit.BCD)
+		return get_flag_state(FlagBit.BCD)
 	set(d):
-		set_flag(flag_bit.BCD, d)
+		set_flag(FlagBit.BCD, d)
 
 @export var break_flag: bool:
 	get:
-		return get_flag_state(flag_bit.BREAK)
+		return get_flag_state(FlagBit.BREAK)
 	set(b):
-		set_flag(flag_bit.BREAK, b)
+		set_flag(FlagBit.BREAK, b)
 
 @export var overflow_flag: bool:
 	get:
-		return get_flag_state(flag_bit.OVERFLOW)
+		return get_flag_state(FlagBit.OVERFLOW)
 	set(o):
-		set_flag(flag_bit.OVERFLOW, o)
+		set_flag(FlagBit.OVERFLOW, o)
 
 @export var negative_flag: bool:
 	get:
-		return get_flag_state(flag_bit.NEGATIVE)
+		return get_flag_state(FlagBit.NEGATIVE)
 	set(n):
-		set_flag(flag_bit.NEGATIVE, n)
+		set_flag(FlagBit.NEGATIVE, n)
 
 @export_group("")
 
@@ -115,20 +114,20 @@ func _ready():
 	_setup_specs()
 	reset()
 
-func get_status() -> status:
+func get_status() -> EmulationStatus:
 	return _status
 
-func get_flag_state(flag: flag_bit) -> bool:
+func get_flag_state(flag: FlagBit) -> bool:
 	return (flags & flag) == flag
 
-func set_flag(flag: flag_bit, state: bool):
+func set_flag(flag: FlagBit, state: bool):
 	if state:
 		flags |= flag
 	else:
 		flags &= (~flag)
 
-func set_status(new_status: status, no_reset = false):
-	if new_status == status.STOPPED and !no_reset:
+func set_status(new_status: EmulationStatus, no_reset = false):
+	if new_status == EmulationStatus.STOPPED and !no_reset:
 		reset()
 	if _status == new_status:
 		return
@@ -159,13 +158,13 @@ func unload_rom():
 	else:
 		rom_unloaded.emit()
 
-func reset(reset_status:status = _status):
+func reset(reset_status:EmulationStatus = _status):
 	A = 0
 	X = 0
 	Y = 0
 	PC = pc_start
 	SP = sp_start
-	flags = flag_bit.UNUSED | flag_bit.BREAK
+	flags = FlagBit.UNUSED | FlagBit.BREAK
 	set_status(reset_status, true)
 	if _defer_signals:
 		cpu_reset.emit.call_deferred()
@@ -275,7 +274,7 @@ func _branch(relative_pos:int, condition: bool):
 
 func _adc(val:int):
 	if decimal_flag:
-		var low_nibble := (A & 0x0F) + (val & 0x0F) + (flags & flag_bit.CARRY)
+		var low_nibble := (A & 0x0F) + (val & 0x0F) + (flags & FlagBit.CARRY)
 		var high_nibble := (A & 0xF0) + (val & 0xF0)
 		if low_nibble > 0x09:
 			high_nibble += 0x10
@@ -286,18 +285,18 @@ func _adc(val:int):
 		carry_flag = high_nibble & 0xFF00
 		A = (low_nibble & 0x0F) + (high_nibble & 0xF0)
 	else:
-		var sum := A + val + (flags & flag_bit.CARRY)
+		var sum := A + val + (flags & FlagBit.CARRY)
 		overflow_flag = ~(A ^ val) & (A ^ sum) & 0x80
 		carry_flag = sum & 0xFF00 > 0
 		A = sum & 0xFF
 	_update_zero_negative(A)
 
 func _sbc(val:int):
-	var diff := A - val - (1 - flags & flag_bit.CARRY)
+	var diff := A - val - (1 - flags & FlagBit.CARRY)
 	overflow_flag = (A ^ val) & (A ^ diff) & 0x80
 
 	if decimal_flag:
-		var low_nibble := (A & 0x0F) - (val & 0x0F) - (1 - flags & flag_bit.CARRY)
+		var low_nibble := (A & 0x0F) - (val & 0x0F) - (1 - flags & FlagBit.CARRY)
 		var high_nibble := (A & 0xF0) - (val & 0xF0)
 		if low_nibble & 0x10 > 0:
 			low_nibble -= 6
@@ -316,21 +315,21 @@ func _compare(val:int, reg:int):
 	negative_flag = val == reg
 
 func _rol(val:int) -> int:
-	var carry := flags & flag_bit.CARRY
-	flags = (flags & (~flag_bit.CARRY)) | ((val & 0x80) >> 7)
+	var carry := flags & FlagBit.CARRY
+	flags = (flags & (~FlagBit.CARRY)) | ((val & 0x80) >> 7)
 	val = ((val << 1) & 0xFE) | carry
 	_update_zero_negative(val)
 	return val
 
 func _ror(val:int) -> int:
-	var carry := flags & flag_bit.CARRY
-	flags = (flags & (~flag_bit.CARRY)) | (val & 1)
+	var carry := flags & FlagBit.CARRY
+	flags = (flags & (~FlagBit.CARRY)) | (val & 1)
 	val = (val >> 1) | (carry << 7)
 	_update_zero_negative(val)
 	return val
 
 func _lsr(val:int) -> int:
-	flags = (flags & (~flag_bit.CARRY)) | (val & 1)
+	flags = (flags & (~FlagBit.CARRY)) | (val & 1)
 	val = val >> 1
 	_update_zero_negative(val)
 	return val
@@ -345,13 +344,13 @@ func override_opcode(opcode:int) -> int:
 	return 0
 
 func execute(force = false, new_PC = -1) -> int:
-	if _status != status.RUNNING and !force:
+	if _status != EmulationStatus.RUNNING and !force:
 		return 0
 	if new_PC > -1:
 		PC = new_PC
 
 	if PC >= memory.size():
-		set_status(status.END)
+		set_status(EmulationStatus.END)
 		return 0
 
 	current_opcode = pop_byte()
@@ -368,8 +367,8 @@ func execute(force = false, new_PC = -1) -> int:
 		0x00: # BRK, implied
 			# set_status(status.STOPPED, true)
 			push_stack_addr(PC + 1)
-			push_stack(flags | flag_bit.BREAK)
-			flags = flags | flag_bit.INTERRUPT | flag_bit.BREAK
+			push_stack(flags | FlagBit.BREAK)
+			flags = flags | FlagBit.INTERRUPT | FlagBit.BREAK
 		0x01: # ORA, indexed indirect
 			A |= get_byte(get_indexed_indirect_addr())
 			_update_zero_negative(A)
